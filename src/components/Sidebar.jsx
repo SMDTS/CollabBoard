@@ -1,7 +1,8 @@
+// Sidebar.jsx
 import { NavLink } from "react-router-dom";
 
 const NAV_ITEMS = [
-  { label: "Board", to: "/", end: true },
+  { label: "Boards", to: "/", end: true },
   { label: "Dashboard", to: "/dashboard" },
   { label: "My Tasks", to: "/my-tasks" },
   { label: "Team", to: "/team" },

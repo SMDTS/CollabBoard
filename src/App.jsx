@@ -3,6 +3,7 @@ import { Routes, Route, useLocation } from "react-router-dom";
 import Sidebar from "./components/Sidebar";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
+import BoardsListPage from "./pages/BoardsListPage";
 import BoardPage from "./pages/BoardPage";
 import TaskDetailPage from "./pages/TaskDetailPage";
 import DashboardPage from "./pages/DashboardPage";
@@ -32,7 +33,8 @@ function App() {
       <Sidebar />
       <div className="main">
         <Routes>
-          <Route path="/" element={<BoardPage />} />
+          <Route path="/" element={<BoardsListPage />} />
+          <Route path="/boards/:boardId" element={<BoardPage />} />
           <Route path="/tasks/:id" element={<TaskDetailPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/my-tasks" element={<MyTasksPage />} />
