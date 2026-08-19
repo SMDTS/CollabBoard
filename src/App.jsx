@@ -1,6 +1,8 @@
+// App.jsx
 import { Routes, Route, useLocation } from "react-router-dom";
 import Sidebar from "./components/Sidebar";
 import LoginPage from "./pages/LoginPage";
+import SignupPage from "./pages/SignupPage";
 import BoardPage from "./pages/BoardPage";
 import TaskDetailPage from "./pages/TaskDetailPage";
 import DashboardPage from "./pages/DashboardPage";
@@ -9,14 +11,18 @@ import TeamPage from "./pages/TeamPage";
 import SettingsPage from "./pages/SettingsPage";
 import NotFoundPage from "./pages/NotFoundPage";
 
+const AUTH_ROUTES = ["/login", "/signup"];
+
 function App() {
   const location = useLocation();
-  const isLoginPage = location.pathname === "/login";
+  const isAuthPage = AUTH_ROUTES.includes(location.pathname);
 
-  if (isLoginPage) {
+  // Login/Signup render full-screen with their own design, no app shell.
+  if (isAuthPage) {
     return (
       <Routes>
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignupPage />} />
       </Routes>
     );
   }
