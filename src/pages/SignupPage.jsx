@@ -38,10 +38,11 @@ function Field({ id, label, type = "text", value, onChange, adornment, autoCompl
   );
 }
 
-export default function LoginPage() {
+export default function SignupPage() {
   const navigate = useNavigate();
   const [showPw, setShowPw] = useState(false);
-  const [form, setForm] = useState({ email: "", password: "" });
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [form, setForm] = useState({ name: "", email: "", password: "", confirm: "" });
   const [submitted, setSubmitted] = useState(false);
 
   const update = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
@@ -49,11 +50,11 @@ export default function LoginPage() {
   const handleSubmit = (e) => {
     e.preventDefault();
     setSubmitted(true);
-    // TODO (M2 owner): replace with a real POST to /api/auth/login,
-    // store the returned JWT, and only navigate on success.
+    // TODO (M2 owner): replace with a real POST to /api/auth/signup,
+    // then either auto-login or send the user to /login.
     window.setTimeout(() => {
       setSubmitted(false);
-      navigate("/");
+      navigate("/login");
     }, 900);
   };
 
@@ -73,7 +74,7 @@ export default function LoginPage() {
 
             <div className="ft-hero-text">
               <div className="ft-hero-copy">
-                <p className="ft-eyebrow"><Sparkles size={13} strokeWidth={2.4} /> Welcome back</p>
+                <p className="ft-eyebrow"><Sparkles size={13} strokeWidth={2.4} /> Built for small, fast-moving teams</p>
                 <h1>Where scattered work<br />becomes a plan.</h1>
                 <p className="ft-sub">
                   CollabBoard pulls every task, note and deadline into one shared board,
@@ -95,9 +96,10 @@ export default function LoginPage() {
 
         <section className="ft-panel">
           <div className="ft-card">
-            <h2 className="ft-heading">Log In</h2>
+            <h2 className="ft-heading">Create an Account</h2>
 
             <form className="ft-form" onSubmit={handleSubmit}>
+              <Field id="name" label="Name" value={form.name} onChange={update("name")} autoComplete="name" />
               <Field id="email" label="Email" type="email" value={form.email} onChange={update("email")} autoComplete="email" />
               <Field
                 id="password"
@@ -105,19 +107,30 @@ export default function LoginPage() {
                 type={showPw ? "text" : "password"}
                 value={form.password}
                 onChange={update("password")}
-                autoComplete="current-password"
+                autoComplete="new-password"
                 adornment={
                   <button type="button" className="ft-peek" onClick={() => setShowPw((s) => !s)} aria-label={showPw ? "Hide password" : "Show password"}>
                     {showPw ? <EyeOff size={15} /> : <Eye size={15} />}
                   </button>
                 }
               />
-
-              <a href="#" className="ft-forgot">Forgot password?</a>
+              <Field
+                id="confirm"
+                label="Confirm Password"
+                type={showConfirm ? "text" : "password"}
+                value={form.confirm}
+                onChange={update("confirm")}
+                autoComplete="new-password"
+                adornment={
+                  <button type="button" className="ft-peek" onClick={() => setShowConfirm((s) => !s)} aria-label={showConfirm ? "Hide password" : "Show password"}>
+                    {showConfirm ? <EyeOff size={15} /> : <Eye size={15} />}
+                  </button>
+                }
+              />
 
               <div className="ft-actions">
                 <button type="submit" className="ft-cta">
-                  {submitted ? "Logged in" : "Log In"}
+                  {submitted ? "Account created" : "Create an Account"}
                 </button>
 
                 <button type="button" className="ft-google">
@@ -126,7 +139,7 @@ export default function LoginPage() {
               </div>
             </form>
 
-            <p className="ft-switch">Don't have an account? <Link to="/signup">Sign up</Link></p>
+            <p className="ft-switch">Already have an Account? <Link to="/login">Log in</Link></p>
           </div>
         </section>
       </div>
