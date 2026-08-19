@@ -1,12 +1,20 @@
-* { box-sizing: border-box; margin: 0; padding: 0; }
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
 body {
   font-family: "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   color: #1f2023;
 }
 
-.app { display: flex; min-height: 100vh; }
+.app {
+  display: flex;
+  min-height: 100vh;
+}
 
+/* ===== Sidebar ===== */
 .sidebar {
   width: 200px;
   flex-shrink: 0;
@@ -18,28 +26,173 @@ body {
   gap: 20px;
 }
 
-.sidebar__logo { font-weight: 800; font-size: 16px; }
-.sidebar__nav { display: flex; flex-direction: column; gap: 4px; }
-.sidebar__link { color: #9a9ba0; text-decoration: none; font-size: 13.5px; font-weight: 600; padding: 8px 10px; border-radius: 7px; }
-.sidebar__link:hover { background: #26272b; color: #ececee; }
-.sidebar__link--active { background: #2c2d31; color: #6ee7b7; }
+.sidebar__logo {
+  font-weight: 800;
+  font-size: 16px;
+}
 
-.main { flex: 1; padding: 24px; }
+.sidebar__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
 
-.page-placeholder { max-width: 520px; }
-.page-placeholder h1 { font-size: 20px; margin-bottom: 8px; }
-.page-placeholder p { font-size: 13.5px; color: #666; line-height: 1.6; }
+.sidebar__link {
+  color: #9a9ba0;
+  text-decoration: none;
+  font-size: 13.5px;
+  font-weight: 600;
+  padding: 8px 10px;
+  border-radius: 7px;
+}
 
-/* Page owners: add page-specific styles below, prefixed with your page's
-   own class (e.g. .board-*, .dash-*) to avoid colliding with each other. */
+.sidebar__link:hover {
+  background: #26272b;
+  color: #ececee;
+}
 
-.login-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #1b1c1f; }
-.login-card { width: 340px; background: #fff; border-radius: 14px; padding: 32px 28px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
-.login-card__logo { font-weight: 800; font-size: 18px; color: #1b1c1f; }
-.login-card__subtitle { font-size: 13px; color: #777; margin-bottom: 4px; }
-.login-field { display: flex; flex-direction: column; gap: 5px; font-size: 12.5px; font-weight: 600; color: #333; }
-.login-field input { padding: 9px 11px; border-radius: 8px; border: 1px solid #ddd; font-size: 13.5px; font-family: inherit; outline: none; }
-.login-field input:focus { border-color: #6ee7b7; }
-.login-submit { margin-top: 6px; padding: 10px; border: none; border-radius: 8px; background: #1b1c1f; color: #fff; font-weight: 700; font-size: 13.5px; cursor: pointer; }
-.login-submit:hover { background: #2c2d31; }
-.login-card__footer { text-align: center; font-size: 11.5px; color: #999; margin-top: 4px; }
+.sidebar__link--active {
+  background: #2c2d31;
+  color: #6ee7b7;
+}
+
+/* ===== Main content ===== */
+.main {
+  flex: 1;
+  padding: 24px;
+}
+
+/* ===== Dummy page placeholder ===== */
+.page-placeholder {
+  max-width: 520px;
+}
+
+.page-placeholder h1 {
+  font-size: 20px;
+  margin-bottom: 8px;
+}
+
+.page-placeholder p {
+  font-size: 13.5px;
+  color: #666;
+  line-height: 1.6;
+}
+
+/* ===== Board page ===== */
+.board-page__header {
+  margin-bottom: 20px;
+}
+
+.board-page__title {
+  font-size: 22px;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+
+.board-page__subtitle {
+  font-size: 13px;
+  color: #777;
+}
+
+.board {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  overflow-x: auto;
+}
+
+.board-column {
+  width: 280px;
+  flex-shrink: 0;
+  background: #f4f5f7;
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.board-column__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 4px 12px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid #e2e3e6;
+}
+
+.board-column__title {
+  font-size: 13.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #444;
+}
+
+.board-column__count {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #888;
+  background: #e6e7ea;
+  border-radius: 999px;
+  padding: 1px 8px;
+}
+
+.board-column__cards {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.board-card {
+  background: #fff;
+  border: 1px solid #e4e4e7;
+  border-radius: 8px;
+  padding: 12px 14px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.board-card__title {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #18181b;
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.board-card__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11.5px;
+  color: #71717a;
+  margin-bottom: 8px;
+}
+
+.board-card__status {
+  display: inline-block;
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #e4e4e7;
+  color: #3f3f46;
+}
+
+.board-card__status--to-do {
+  background: #ede9fe;
+  color: #6d28d9;
+}
+
+.board-card__status--doing {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.board-card__status--done {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+/*
+  Page owners: add your page-specific styles below, prefixed with your
+  page's class (e.g. .board-*, .dash-*, .task-*) so we don't collide with
+  each other's CSS when merging.
+*/

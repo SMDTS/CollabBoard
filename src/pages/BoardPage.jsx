@@ -1,8 +1,13 @@
+// BoardPage.jsx
+import Board from "../components/Board";
+
 function BoardPage() {
   return (
-    <div className="page-placeholder">
-      <h1>Board</h1>
-      <p>Dummy page — build the column/card kanban layout here.</p>
+    <div className="board-page">
+      <div className="board-page__header">
+        <h1 className="board-page__title">Product Launch</h1>
+      </div>
+      <Board />
     </div>
   );
 }
