@@ -1,6 +1,7 @@
 // App.jsx
 import { Routes, Route, useLocation } from "react-router-dom";
 import Sidebar from "./components/Sidebar";
+import TopBar from "./components/TopBar";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import BoardsListPage from "./pages/BoardsListPage";
@@ -31,17 +32,20 @@ function App() {
   return (
     <div className="app">
       <Sidebar />
-      <div className="main">
-        <Routes>
-          <Route path="/" element={<BoardsListPage />} />
-          <Route path="/boards/:boardId" element={<BoardPage />} />
-          <Route path="/tasks/:id" element={<TaskDetailPage />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/my-tasks" element={<MyTasksPage />} />
-          <Route path="/team" element={<TeamPage />} />
-          <Route path="/settings" element={<SettingsPage />} />
-          <Route path="*" element={<NotFoundPage />} />
-        </Routes>
+      <div className="app__content">
+        <TopBar />
+        <div className="main">
+          <Routes>
+            <Route path="/" element={<BoardsListPage />} />
+            <Route path="/boards/:boardId" element={<BoardPage />} />
+            <Route path="/tasks/:id" element={<TaskDetailPage />} />
+            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/my-tasks" element={<MyTasksPage />} />
+            <Route path="/team" element={<TeamPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
+            <Route path="*" element={<NotFoundPage />} />
+          </Routes>
+        </div>
       </div>
     </div>
   );
