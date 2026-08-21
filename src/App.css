@@ -479,6 +479,99 @@ body {
   }
 }
 
+/* ===== My Tasks page ===== */
+.mytasks-page__title {
+  font-size: 22px;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+
+.mytasks-page__subtitle {
+  font-size: 13px;
+  color: #777;
+  margin-bottom: 22px;
+}
+
+.mytasks-empty {
+  font-size: 13px;
+  color: #888;
+}
+
+.mytasks-group {
+  max-width: 520px;
+  margin-bottom: 20px;
+}
+
+.mytasks-group__title {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #444;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mytasks-group__count {
+  font-size: 11px;
+  font-weight: 700;
+  color: #888;
+  background: #eee;
+  border-radius: 999px;
+  padding: 1px 7px;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.mytasks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mytasks-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #fff;
+  border: 1px solid #e4e4e7;
+  border-radius: 8px;
+  padding: 10px 14px;
+  text-decoration: none;
+  color: inherit;
+  font-size: 13px;
+  transition: border-color 0.12s ease;
+}
+
+.mytasks-row:hover {
+  border-color: #a3a3ab;
+}
+
+.mytasks-row__status {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.mytasks-row__status--to-do { background: #8b6ff2; }
+.mytasks-row__status--doing { background: #58b8ef; }
+.mytasks-row__status--done { background: #22c55e; }
+
+.mytasks-row__title {
+  flex: 1;
+  font-weight: 600;
+  color: #18181b;
+}
+
+.mytasks-row__due {
+  font-size: 11.5px;
+  color: #71717a;
+  flex-shrink: 0;
+}
+
 /*
   Page owners: add your page-specific styles below, prefixed with your
   page's class (e.g. .board-*, .dash-*, .task-*) so we don't collide with
