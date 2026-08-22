@@ -1,8 +1,3 @@
-// TaskDetailPage.jsx
-// Full standalone view of a task, reached via /tasks/:id (e.g. from My
-// Tasks, or a shared link). Distinct from TaskDetailPanel, which is the
-// quick slide-in editor opened from the board itself — this page has more
-// room, so it also surfaces a description field the panel doesn't.
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { useTasks, useTasksActions } from "../context/TasksContext";
 import { useToast } from "../context/ToastContext";

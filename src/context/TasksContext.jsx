@@ -1,8 +1,4 @@
-// TasksContext.jsx
-// Lifts task state out of the static mockTasks import so drag-and-drop can
-// actually mutate status, and so any component (Board, MyTasks, the command
-// palette, the detail panel) reads/writes the same live list.
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useRef } from "react";
 import initialTasks from "../data/mockTasks";
 
 const TasksStateContext = createContext(null);
@@ -10,6 +6,21 @@ const TasksActionsContext = createContext(null);
 
 export function TasksProvider({ children }) {
   const [tasks, setTasks] = useState(initialTasks);
+
+  const nextId = useRef(Math.max(...initialTasks.map((t) => t.id), 0) + 1);
+
+  const addTask = (status, title, assignee = "Sarah") => {
+    const trimmed = title.trim();
+    if (!trimmed) return;
+    const newTask = {
+      id: nextId.current++,
+      title: trimmed,
+      assignee,
+      status,
+      dueDate: "No date",
+    };
+    setTasks((prev) => [...prev, newTask]);
+  };
 
   const moveTask = (taskId, newStatus) => {
     setTasks((prev) => prev.map((t) => (t.id === taskId ? { ...t, status: newStatus } : t)));
@@ -25,7 +36,7 @@ export function TasksProvider({ children }) {
 
   return (
     <TasksStateContext.Provider value={tasks}>
-      <TasksActionsContext.Provider value={{ moveTask, deleteTask, updateTask }}>
+      <TasksActionsContext.Provider value={{ addTask, moveTask, deleteTask, updateTask }}>
         {children}
       </TasksActionsContext.Provider>
     </TasksStateContext.Provider>

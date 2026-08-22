@@ -1,4 +1,3 @@
-// DashboardPage.jsx
 import { Link } from "react-router-dom";
 import { useTasks } from "../context/TasksContext";
 import mockBoards from "../data/mockBoards";

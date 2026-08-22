@@ -9,8 +9,10 @@ const STATUS_THEME = {
 };
 
 function Column({ title, children, onOpenTask }) {
-  const { moveTask } = useTasksActions();
+  const { moveTask, addTask } = useTasksActions();
   const [isDragOver, setIsDragOver] = useState(false);
+  const [draft, setDraft] = useState("");
+  const [isAdding, setIsAdding] = useState(false);
   const theme = STATUS_THEME[title] || { accent: "var(--cb-violet)", tint: "var(--cb-surface-sunken)" };
   const isEmpty = children.length === 0;
 
@@ -30,6 +32,29 @@ function Column({ title, children, onOpenTask }) {
     if (taskId) moveTask(taskId, title);
   }
 
+  function handleEnter() {
+    if (!draft.trim()) return;
+    addTask(title, draft);
+    setDraft("");
+    // Stays open so typing several cards in a row doesn't need re-clicking.
+  }
+
+  function handleBlur() {
+    if (draft.trim()) addTask(title, draft);
+    setDraft("");
+    setIsAdding(false);
+  }
+
+  function handleKeyDown(e) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleEnter();
+    } else if (e.key === "Escape") {
+      setDraft("");
+      setIsAdding(false);
+    }
+  }
+
   return (
     <div
       className={`board-column ${isDragOver ? "board-column--drag-over" : ""}`}
@@ -44,7 +69,7 @@ function Column({ title, children, onOpenTask }) {
         <span className="board-column__count">{children.length}</span>
       </div>
       <div className="board-column__cards">
-        {isEmpty ? (
+        {isEmpty && !isAdding ? (
           <div className="board-column__empty">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
               <rect x="4" y="5" width="16" height="14" rx="2" />
@@ -55,6 +80,26 @@ function Column({ title, children, onOpenTask }) {
           </div>
         ) : (
           children
+        )}
+
+        {isAdding ? (
+          <input
+            className="board-column__add-input"
+            placeholder="Task title, press Enter"
+            value={draft}
+            autoFocus
+            onChange={(e) => setDraft(e.target.value)}
+            onKeyDown={handleKeyDown}
+            onBlur={handleBlur}
+          />
+        ) : (
+          <button className="board-column__add-btn" onClick={() => setIsAdding(true)}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            Add a card
+          </button>
         )}
       </div>
     </div>

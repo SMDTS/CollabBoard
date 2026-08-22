@@ -535,6 +535,45 @@ body {
   border-radius: 7px;
 }
 
+.board-column__add-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 8px 8px;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  color: var(--cb-text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.board-column__add-btn:hover {
+  background: var(--cb-hover-tint);
+  color: var(--cb-text);
+}
+
+.board-column__add-input {
+  width: 100%;
+  padding: 9px 10px;
+  border: none;
+  border-radius: 6px;
+  background: var(--cb-card-bg);
+  color: var(--cb-text);
+  font-size: 12.5px;
+  font-family: inherit;
+  outline: none;
+  box-shadow: var(--cb-shadow-sm);
+}
+
+.board-column__add-input:focus {
+  box-shadow: 0 0 0 2px var(--cb-violet);
+}
+
 .board-column__header {
   display: flex;
   align-items: center;

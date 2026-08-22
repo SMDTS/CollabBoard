@@ -1,6 +1,3 @@
-// CommandPalette.jsx
-// Controlled from App.jsx so both the Ctrl+K shortcut and the TopBar's
-// search bar open the exact same overlay, instead of duplicating search.
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTasks } from "../context/TasksContext";

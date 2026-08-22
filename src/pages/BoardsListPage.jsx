@@ -1,4 +1,3 @@
-// BoardsListPage.jsx
 import { Link } from "react-router-dom";
 import mockBoards from "../data/mockBoards";
 import { useToast } from "../context/ToastContext";

@@ -1,4 +1,3 @@
-// mockBoards.js
 const mockBoards = [
   {
     id: "product-launch",

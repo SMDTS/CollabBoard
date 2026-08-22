@@ -1,5 +1,3 @@
-// mockTasks.js
-// 9 tasks, 3 per status, matching the M1 brief exactly:
 // id, title, assignee, status, dueDate.
 
 const mockTasks = [

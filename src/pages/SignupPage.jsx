@@ -50,8 +50,7 @@ export default function SignupPage() {
   const handleSubmit = (e) => {
     e.preventDefault();
     setSubmitted(true);
-    // TODO (M2 owner): replace with a real POST to /api/auth/signup,
-    // then either auto-login or send the user to /login.
+
     window.setTimeout(() => {
       setSubmitted(false);
       navigate("/login");

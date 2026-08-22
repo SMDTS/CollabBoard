@@ -1,7 +1,3 @@
-// ThemeContext.jsx
-// Real light/dark theme preference, persisted to localStorage. This is a
-// normal downloadable web app (not a Claude.ai artifact sandbox), so
-// localStorage is the correct, standard way to remember this across visits.
 import { createContext, useContext, useEffect, useState } from "react";
 
 const ThemeContext = createContext(null);

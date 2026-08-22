@@ -1,4 +1,3 @@
-// BoardPage.jsx
 import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import mockBoards from "../data/mockBoards";

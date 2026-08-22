@@ -1,7 +1,3 @@
-// BubbleBackground.jsx
-// A lightweight, dependency-free equivalent of the animate-ui BubbleBackground
-// concept: a few ambient blobs that drift on their own, plus (when
-// interactive) one larger soft bubble that follows the cursor.
 import { useEffect, useRef } from "react";
 
 function BubbleBackground({ interactive = true, className = "" }) {

@@ -22,7 +22,6 @@ function App() {
   const isAuthPage = AUTH_ROUTES.includes(location.pathname);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
-  // Login/Signup render full-screen with their own design, no app shell.
   if (isAuthPage) {
     return (
       <Routes>

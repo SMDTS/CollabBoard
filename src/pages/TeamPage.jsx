@@ -1,4 +1,3 @@
-// TeamPage.jsx
 import { useState } from "react";
 import mockTeam from "../data/mockTeam";
 import mockTasks from "../data/mockTasks";

@@ -1,7 +1,3 @@
-// TaskDetailPanel.jsx
-// Slides in from the right when a card is clicked, instead of navigating
-// away to a separate page — same pattern as Linear/Height/ClickUp use for
-// quick task edits.
 import { useTasks, useTasksActions } from "../context/TasksContext";
 import { useToast } from "../context/ToastContext";
 

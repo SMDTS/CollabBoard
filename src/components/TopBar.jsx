@@ -1,12 +1,9 @@
-// TopBar.jsx
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
 
-// TODO (M2 owner): replace with the real logged-in user once auth exists.
 const CURRENT_USER = { name: "Dinith", initials: "D" };
 
-// TODO (M5 owner): replace with a real notification count once Socket.io/activity exists.
 const NOTIFICATION_COUNT = 3;
 
 function formatDateTime(date) {

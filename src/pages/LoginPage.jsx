@@ -49,8 +49,6 @@ export default function LoginPage() {
   const handleSubmit = (e) => {
     e.preventDefault();
     setSubmitted(true);
-    // TODO (M2 owner): replace with a real POST to /api/auth/login,
-    // store the returned JWT, and only navigate on success.
     window.setTimeout(() => {
       setSubmitted(false);
       navigate("/");

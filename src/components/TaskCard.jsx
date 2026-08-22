@@ -1,5 +1,3 @@
-// TaskCard.jsx
-
 const ASSIGNEE_COLORS = {
   Sarah: "var(--cb-violet)",
   Jordan: "var(--cb-sky)",

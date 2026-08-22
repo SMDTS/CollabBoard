@@ -1,4 +1,3 @@
-// mockTeam.js
 const mockTeam = [
   { id: 1, name: "Dinith", email: "Dinith@collabboard.dev", role: "Frontend", status: "online" },
   { id: 2, name: "Dasun", email: "Dasun@collabboard.dev", role: "Backend", status: "away" },
