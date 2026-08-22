@@ -2,6 +2,7 @@
 import { Link } from "react-router-dom";
 import { useTasks } from "../context/TasksContext";
 import mockBoards from "../data/mockBoards";
+import BubbleBackground from "../components/BubbleBackground";
 
 const STATUSES = ["To Do", "Doing", "Done"];
 
@@ -77,11 +78,14 @@ function DashboardPage() {
   ];
 
   return (
-    <div className="page-shell">
-      <h1 className="page-shell__title">Dashboard</h1>
-      <p className="page-shell__subtitle">A quick look across your boards.</p>
+    <div className="page-shell dash-page">
+      <BubbleBackground interactive className="dash-bg" />
 
-      <div className="dash-stats">
+      <div className="dash-content">
+        <h1 className="page-shell__title">Dashboard</h1>
+        <p className="page-shell__subtitle">A quick look across your boards.</p>
+
+        <div className="dash-stats">
         {statCards.map((stat) => (
           <div className={`dash-stat ${stat.className}`} key={stat.label}>
             <div className="dash-stat__icon">
@@ -130,6 +134,7 @@ function DashboardPage() {
             <div className="dash-activity-fade" />
           </div>
         </section>
+        </div>
       </div>
     </div>
   );
