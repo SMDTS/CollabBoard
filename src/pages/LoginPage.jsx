@@ -68,7 +68,7 @@ export default function LoginPage() {
           <div className="ft-hero-inner">
             <div className="ft-brand">
               <img src={LOGO_ICON} alt="" className="ft-brand-mark" />
-              <span className="ft-brand-name">CollabBoard</span>
+              <span className="ft-brand-name">Flowty</span>
             </div>
 
             <div className="ft-hero-text">

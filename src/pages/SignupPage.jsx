@@ -69,7 +69,7 @@ export default function SignupPage() {
           <div className="ft-hero-inner">
             <div className="ft-brand">
               <img src={LOGO_ICON} alt="" className="ft-brand-mark" />
-              <span className="ft-brand-name">CollabBoard</span>
+              <span className="ft-brand-name">Flowty</span>
             </div>
 
             <div className="ft-hero-text">

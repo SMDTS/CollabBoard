@@ -1,7 +1,9 @@
 // App.jsx
+import { useState } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 import Sidebar from "./components/Sidebar";
 import TopBar from "./components/TopBar";
+import CommandPalette from "./components/CommandPalette";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import BoardsListPage from "./pages/BoardsListPage";
@@ -18,6 +20,7 @@ const AUTH_ROUTES = ["/login", "/signup"];
 function App() {
   const location = useLocation();
   const isAuthPage = AUTH_ROUTES.includes(location.pathname);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   // Login/Signup render full-screen with their own design, no app shell.
   if (isAuthPage) {
@@ -33,7 +36,7 @@ function App() {
     <div className="app">
       <Sidebar />
       <div className="app__content">
-        <TopBar />
+        <TopBar onOpenSearch={() => setIsSearchOpen(true)} />
         <div className="main">
           <Routes>
             <Route path="/" element={<BoardsListPage />} />
@@ -47,6 +50,7 @@ function App() {
           </Routes>
         </div>
       </div>
+      <CommandPalette isOpen={isSearchOpen} onOpenChange={setIsSearchOpen} />
     </div>
   );
 }

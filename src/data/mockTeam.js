@@ -1,8 +1,8 @@
 // mockTeam.js
 const mockTeam = [
-  { id: 1, name: "Sarah", email: "sarah@collabboard.dev", role: "Frontend" },
-  { id: 2, name: "Jordan", email: "jordan@collabboard.dev", role: "Backend" },
-  { id: 3, name: "Priya", email: "priya@collabboard.dev", role: "Design" },
+  { id: 1, name: "Dinith", email: "Dinith@collabboard.dev", role: "Frontend", status: "online" },
+  { id: 2, name: "Dasun", email: "Dasun@collabboard.dev", role: "Backend", status: "away" },
+  { id: 3, name: "Tehan", email: "Tehan@collabboard.dev", role: "Design", status: "offline" },
 ];
 
 export default mockTeam;

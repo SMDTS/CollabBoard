@@ -1,9 +1,10 @@
 // TopBar.jsx
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTheme } from "../context/ThemeContext";
 
 // TODO (M2 owner): replace with the real logged-in user once auth exists.
-const CURRENT_USER = { name: "Sarah", initials: "S" };
+const CURRENT_USER = { name: "Dinith", initials: "D" };
 
 // TODO (M5 owner): replace with a real notification count once Socket.io/activity exists.
 const NOTIFICATION_COUNT = 3;
@@ -14,10 +15,12 @@ function formatDateTime(date) {
   return `${dateStr} · ${timeStr}`;
 }
 
-function TopBar() {
+function TopBar({ onOpenSearch }) {
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
   const [now, setNow] = useState(new Date());
   const [menuOpen, setMenuOpen] = useState(false);
+  const isMac = typeof navigator !== "undefined" && /Mac/.test(navigator.platform);
 
   useEffect(() => {
     const interval = setInterval(() => setNow(new Date()), 1000 * 30);
@@ -28,7 +31,34 @@ function TopBar() {
     <div className="topbar">
       <div className="topbar__datetime">{formatDateTime(now)}</div>
 
+      <button className="topbar__search" onClick={onOpenSearch}>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="11" cy="11" r="7" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
+        <span className="topbar__search-placeholder">Search boards, tasks…</span>
+        <span className="topbar__search-kbd">{isMac ? "⌘K" : "Ctrl K"}</span>
+      </button>
+
       <div className="topbar__right">
+        <button
+          className="topbar__icon-btn"
+          onClick={toggleTheme}
+          aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+          title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+        >
+          {theme === "dark" ? (
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="4" />
+              <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+            </svg>
+          ) : (
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
+            </svg>
+          )}
+        </button>
+
         <button className="topbar__icon-btn" aria-label="Notifications">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9" />

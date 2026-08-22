@@ -1,18 +1,15 @@
 // DashboardPage.jsx
 import { Link } from "react-router-dom";
-import mockTasks from "../data/mockTasks";
+import { useTasks } from "../context/TasksContext";
 import mockBoards from "../data/mockBoards";
-import dashboardBg from "../assets/dashboard/dashboard-bg.jpg";
 
 const STATUSES = ["To Do", "Doing", "Done"];
 
-// Colors sampled directly from dashboard-bg.jpg's four blobs, so every
-// accent on this page is drawn from the actual background artwork.
-const STAT_ACCENTS = {
-  Total: { className: "dash-stat--iris-deep", hex: "#af8f76" },
-  "To Do": { className: "dash-stat--violet", hex: "#d0ac8c" },
-  Doing: { className: "dash-stat--sky", hex: "#e5d2b4" },
-  Done: { className: "dash-stat--iris", hex: "#ebdcc7" },
+const STAT_ICONS = {
+  Total: { className: "dash-stat--iris-deep", icon: "layers" },
+  "To Do": { className: "dash-stat--violet", icon: "circle" },
+  Doing: { className: "dash-stat--sky", icon: "clock" },
+  Done: { className: "dash-stat--iris", icon: "check" },
 };
 
 const BOARD_ACCENTS = ["dash-accent--iris", "dash-accent--violet", "dash-accent--sky"];
@@ -24,9 +21,46 @@ const MOCK_ACTIVITY = [
   { id: 3, text: "Priya added a new task to Product Launch" },
   { id: 4, text: "Sarah created the Marketing Site board" },
   { id: 5, text: "Jordan commented on \"Style board layout with flexbox\"" },
+  { id: 6, text: "Priya moved \"Write API spec for tasks endpoint\" to Doing" },
+  { id: 7, text: "Sarah updated the due date on \"Draft onboarding wireframes\"" },
+  { id: 8, text: "Jordan reassigned \"Confirm dev server runs\" to Priya" },
 ];
 
+function StatIcon({ name }) {
+  const common = { width: 18, height: 18, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round" };
+  if (name === "layers") {
+    return (
+      <svg {...common}>
+        <polygon points="12 2 2 7 12 12 22 7 12 2" />
+        <polyline points="2 17 12 22 22 17" />
+        <polyline points="2 12 12 17 22 12" />
+      </svg>
+    );
+  }
+  if (name === "circle") {
+    return (
+      <svg {...common}>
+        <circle cx="12" cy="12" r="9" />
+      </svg>
+    );
+  }
+  if (name === "clock") {
+    return (
+      <svg {...common}>
+        <circle cx="12" cy="12" r="9" />
+        <polyline points="12 7 12 12 15.5 14" />
+      </svg>
+    );
+  }
+  return (
+    <svg {...common}>
+      <polyline points="20 6 9 17 4 12" />
+    </svg>
+  );
+}
+
 function DashboardPage() {
+  const mockTasks = useTasks();
   const total = mockTasks.length;
   const counts = STATUSES.reduce((acc, status) => {
     acc[status] = mockTasks.filter((t) => t.status === status).length;
@@ -34,42 +68,35 @@ function DashboardPage() {
   }, {});
 
   const statCards = [
-    { label: "Total tasks", value: total, pct: 100, ...STAT_ACCENTS.Total },
+    { label: "Total tasks", value: total, ...STAT_ICONS.Total },
     ...STATUSES.map((status) => ({
       label: status,
       value: counts[status],
-      pct: total ? Math.round((counts[status] / total) * 100) : 0,
-      ...STAT_ACCENTS[status],
+      ...STAT_ICONS[status],
     })),
   ];
 
   return (
-    <div
-      className="dash-page"
-      style={{
-        backgroundImage: `linear-gradient(rgba(250, 242, 229, 0.62), rgba(250, 242, 229, 0.62)), url(${dashboardBg})`,
-      }}
-    >
-      <h1 className="dash-page__title">Dashboard</h1>
-      <p className="dash-page__subtitle">
-        A quick look across your boards. Mock data for now — real per-board stats come at M3.
-      </p>
+    <div className="page-shell">
+      <h1 className="page-shell__title">Dashboard</h1>
+      <p className="page-shell__subtitle">A quick look across your boards.</p>
 
       <div className="dash-stats">
         {statCards.map((stat) => (
           <div className={`dash-stat ${stat.className}`} key={stat.label}>
-            <span className="dash-stat__value">{stat.value}</span>
-            <span className="dash-stat__label">{stat.label}</span>
-            <div className="dash-stat__bar">
-              <div className="dash-stat__bar-fill" style={{ width: `${stat.pct}%`, background: stat.hex }} />
+            <div className="dash-stat__icon">
+              <StatIcon name={stat.icon} />
             </div>
-            <span className="dash-stat__pct">{stat.pct}% of total</span>
+            <div className="dash-stat__body">
+              <span className="dash-stat__value">{stat.value}</span>
+              <span className="dash-stat__label">{stat.label}</span>
+            </div>
           </div>
         ))}
       </div>
 
       <div className="dash-columns">
-        <section className="dash-section">
+        <section>
           <h2 className="dash-section__title">Your boards</h2>
           <div className="dash-boards">
             {mockBoards.map((board, i) => (
@@ -89,16 +116,19 @@ function DashboardPage() {
           </div>
         </section>
 
-        <section className="dash-section">
+        <section>
           <h2 className="dash-section__title">Recent activity</h2>
-          <ul className="dash-activity">
-            {MOCK_ACTIVITY.map((item, i) => (
-              <li key={item.id} className={`dash-activity__item ${BOARD_ACCENTS[i % BOARD_ACCENTS.length]}`}>
-                <span className="dash-activity__dot" />
-                {item.text}
-              </li>
-            ))}
-          </ul>
+          <div className="dash-activity-wrap">
+            <ul className="dash-activity">
+              {MOCK_ACTIVITY.map((item, i) => (
+                <li key={item.id} className={`dash-activity__item ${BOARD_ACCENTS[i % BOARD_ACCENTS.length]}`}>
+                  <span className="dash-activity__dot" />
+                  {item.text}
+                </li>
+              ))}
+            </ul>
+            <div className="dash-activity-fade" />
+          </div>
         </section>
       </div>
     </div>
