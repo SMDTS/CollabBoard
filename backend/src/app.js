@@ -5,6 +5,7 @@ import { config } from "./config.js";
 import { requestId } from "./middleware/requestId.js";
 import { requestLogger } from "./middleware/requestLogger.js";
 import { notFoundHandler, errorHandler } from "./middleware/errorHandler.js";
+import taskRoutes from "./routes/taskRoutes.js";
 
 const app = express();
 
@@ -20,7 +21,7 @@ app.get("/api/health", (req, res) => {
   res.json({ status: "ok", uptime: process.uptime() });
 });
 
-// TODO (Lab 1): app.use("/api/tasks", taskRoutes);
+app.use("/api/tasks", taskRoutes);
 // TODO (Lab 3): app.use("/api/auth", authRoutes);
 
 app.use(notFoundHandler); // no route matched
