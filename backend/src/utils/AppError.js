@@ -1,11 +1,10 @@
-// src/utils/AppError.js
 export class AppError extends Error {
   constructor(message, status = 500, code = "INTERNAL_ERROR", details) {
     super(message);
     this.status = status;
     this.code = code;
     this.details = details;
-    this.isOperational = true; // expected failure, not a bug
+    this.isOperational = true; 
   }
 }
 
@@ -24,5 +23,17 @@ export class ForbiddenError extends AppError {
 export class ValidationError extends AppError {
   constructor(details) {
     super("Validation failed", 400, "VALIDATION_ERROR", details);
+  }
+}
+
+export class ConflictError extends AppError {
+  constructor(message = "Already exists") {
+    super(message, 409, "CONFLICT");
+  }
+}
+
+export class UnauthorizedError extends AppError {
+  constructor(message = "Invalid credentials") {
+    super(message, 401, "UNAUTHORIZED");
   }
 }
