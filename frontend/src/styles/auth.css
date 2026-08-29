@@ -266,6 +266,16 @@
   }
   .ft-forgot:hover { color: var(--ft-iris-deep); text-decoration: underline; }
 
+  .ft-error {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #c0392b;
+    background: #fdecea;
+    border-radius: 8px;
+    padding: 8px 12px;
+    margin: -4px 0 0;
+  }
+
   .ft-actions {
     display: flex;
     flex-direction: column;

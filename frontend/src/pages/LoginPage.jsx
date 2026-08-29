@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Eye, EyeOff, Sparkles, Check } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import BG_SHAPE from "../assets/auth/bg-shape.png";
 import LOGO_ICON from "../assets/auth/logo-icon.png";
 import ILLUSTRATION from "../assets/auth/illustration.png";
@@ -40,19 +41,25 @@ function Field({ id, label, type = "text", value, onChange, adornment, autoCompl
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [showPw, setShowPw] = useState(false);
   const [form, setForm] = useState({ email: "", password: "" });
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState("");
 
   const update = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
     setSubmitted(true);
-    window.setTimeout(() => {
-      setSubmitted(false);
+    try {
+      await login(form.email, form.password);
       navigate("/");
-    }, 900);
+    } catch (err) {
+      setError(err.message || "Something went wrong. Try again.");
+      setSubmitted(false);
+    }
   };
 
   return (
@@ -66,7 +73,7 @@ export default function LoginPage() {
           <div className="ft-hero-inner">
             <div className="ft-brand">
               <img src={LOGO_ICON} alt="" className="ft-brand-mark" />
-              <span className="ft-brand-name">Flowty</span>
+              <span className="ft-brand-name">CollabBoard</span>
             </div>
 
             <div className="ft-hero-text">
@@ -113,9 +120,11 @@ export default function LoginPage() {
 
               <a href="#" className="ft-forgot">Forgot password?</a>
 
+              {error && <p className="ft-error">{error}</p>}
+
               <div className="ft-actions">
-                <button type="submit" className="ft-cta">
-                  {submitted ? "Logged in" : "Log In"}
+                <button type="submit" className="ft-cta" disabled={submitted}>
+                  {submitted ? "Logging in…" : "Log In"}
                 </button>
 
                 <button type="button" className="ft-google">

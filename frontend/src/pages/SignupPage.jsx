@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Eye, EyeOff, Sparkles, Check } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import BG_SHAPE from "../assets/auth/bg-shape.png";
 import LOGO_ICON from "../assets/auth/logo-icon.png";
 import ILLUSTRATION from "../assets/auth/illustration.png";
@@ -40,21 +41,32 @@ function Field({ id, label, type = "text", value, onChange, adornment, autoCompl
 
 export default function SignupPage() {
   const navigate = useNavigate();
+  const { register } = useAuth();
   const [showPw, setShowPw] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", password: "", confirm: "" });
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState("");
 
   const update = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setSubmitted(true);
+    setError("");
 
-    window.setTimeout(() => {
+    if (form.password !== form.confirm) {
+      setError("Passwords don't match.");
+      return;
+    }
+
+    setSubmitted(true);
+    try {
+      await register(form.name, form.email, form.password);
+      navigate("/");
+    } catch (err) {
+      setError(err.message || "Something went wrong. Try again.");
       setSubmitted(false);
-      navigate("/login");
-    }, 900);
+    }
   };
 
   return (
@@ -68,7 +80,7 @@ export default function SignupPage() {
           <div className="ft-hero-inner">
             <div className="ft-brand">
               <img src={LOGO_ICON} alt="" className="ft-brand-mark" />
-              <span className="ft-brand-name">Flowty</span>
+              <span className="ft-brand-name">CollabBoard</span>
             </div>
 
             <div className="ft-hero-text">
@@ -127,9 +139,11 @@ export default function SignupPage() {
                 }
               />
 
+              {error && <p className="ft-error">{error}</p>}
+
               <div className="ft-actions">
-                <button type="submit" className="ft-cta">
-                  {submitted ? "Account created" : "Create an Account"}
+                <button type="submit" className="ft-cta" disabled={submitted}>
+                  {submitted ? "Creating account…" : "Create an Account"}
                 </button>
 
                 <button type="button" className="ft-google">
