@@ -1889,6 +1889,11 @@ body {
   color: #fff;
 }
 
+.toast--error {
+  background: var(--cb-danger);
+  color: #fff;
+}
+
 @keyframes cb-toast-in {
   from { transform: translateY(8px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
@@ -2229,4 +2234,17 @@ body {
   .bubble--cursor {
     display: none;
   }
+}
+
+
+/* ===== App-level auth loading state ===== */
+.app-loading {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--cb-bg);
+  color: var(--cb-text-secondary);
+  font-size: 13px;
+  font-weight: 600;
 }
