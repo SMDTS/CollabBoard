@@ -1,8 +1,5 @@
-const ASSIGNEE_COLORS = {
-  Sarah: "var(--cb-violet)",
-  Jordan: "var(--cb-sky)",
-  Priya: "var(--cb-success)",
-};
+// TaskCard.jsx
+import { avatarColor } from "../utils/avatarColor";
 
 const STATUS_ACCENT = {
   "To Do": "var(--cb-violet)",
@@ -15,7 +12,6 @@ function initials(name) {
 }
 
 function TaskCard({ id, title, assignee, dueDate, status, onOpen }) {
-  const avatarColor = ASSIGNEE_COLORS[assignee] || "var(--cb-text-muted)";
   const accent = STATUS_ACCENT[status] || "var(--cb-text-muted)";
 
   function handleDragStart(e) {
@@ -37,7 +33,7 @@ function TaskCard({ id, title, assignee, dueDate, status, onOpen }) {
       <div className="board-card__footer">
         <div className="board-card__left">
           <span className="board-card__status-dot" style={{ background: accent }} />
-          <div className="board-card__assignee" style={{ background: avatarColor }} title={assignee}>
+          <div className="board-card__assignee" style={{ background: avatarColor(assignee) }} title={assignee}>
             {initials(assignee)}
           </div>
         </div>

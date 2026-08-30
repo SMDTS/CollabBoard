@@ -1,9 +1,10 @@
 // App.jsx
 import { useState } from "react";
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route, useLocation, Navigate } from "react-router-dom";
 import Sidebar from "./components/Sidebar";
 import TopBar from "./components/TopBar";
 import CommandPalette from "./components/CommandPalette";
+import { useAuth } from "./context/AuthContext";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import BoardsListPage from "./pages/BoardsListPage";
@@ -20,8 +21,10 @@ const AUTH_ROUTES = ["/login", "/signup"];
 function App() {
   const location = useLocation();
   const isAuthPage = AUTH_ROUTES.includes(location.pathname);
+  const { isAuthenticated, isLoading } = useAuth();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
+  // Login/Signup render full-screen with their own design, no app shell.
   if (isAuthPage) {
     return (
       <Routes>
@@ -31,26 +34,42 @@ function App() {
     );
   }
 
+  // Still checking whether a stored token is valid — avoid flashing a
+  // redirect to /login before we actually know the answer.
+  if (isLoading) {
+    return <div className="app-loading">Loading…</div>;
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
   return (
-    <div className="app">
-      <Sidebar />
-      <div className="app__content">
-        <TopBar onOpenSearch={() => setIsSearchOpen(true)} />
-        <div className="main">
-          <Routes>
-            <Route path="/" element={<BoardsListPage />} />
-            <Route path="/boards/:boardId" element={<BoardPage />} />
-            <Route path="/tasks/:id" element={<TaskDetailPage />} />
-            <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/my-tasks" element={<MyTasksPage />} />
-            <Route path="/team" element={<TeamPage />} />
-            <Route path="/settings" element={<SettingsPage />} />
-            <Route path="*" element={<NotFoundPage />} />
-          </Routes>
-        </div>
-      </div>
-      <CommandPalette isOpen={isSearchOpen} onOpenChange={setIsSearchOpen} />
-    </div>
+    <BoardsProvider>
+      <TasksProvider>
+        <UsersProvider>
+          <div className="app">
+            <Sidebar />
+            <div className="app__content">
+              <TopBar onOpenSearch={() => setIsSearchOpen(true)} />
+              <div className="main">
+                <Routes>
+                  <Route path="/" element={<BoardsListPage />} />
+                  <Route path="/boards/:boardId" element={<BoardPage />} />
+                  <Route path="/tasks/:id" element={<TaskDetailPage />} />
+                  <Route path="/dashboard" element={<DashboardPage />} />
+                  <Route path="/my-tasks" element={<MyTasksPage />} />
+                  <Route path="/team" element={<TeamPage />} />
+                  <Route path="/settings" element={<SettingsPage />} />
+                  <Route path="*" element={<NotFoundPage />} />
+                </Routes>
+              </div>
+            </div>
+            <CommandPalette isOpen={isSearchOpen} onOpenChange={setIsSearchOpen} />
+          </div>
+        </UsersProvider>
+      </TasksProvider>
+    </BoardsProvider>
   );
 }
 

@@ -24,11 +24,11 @@ export function TasksProvider({ children }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const addTask = async (status, title, boardId, assignee = "Sarah") => {
+  const addTask = async (status, title, assignee = "Sarah") => {
     const trimmed = title.trim();
     if (!trimmed) return;
     try {
-      const newTask = await tasksApi.createTask({ title: trimmed, assignee, status, boardId });
+      const newTask = await tasksApi.createTask({ title: trimmed, assignee, status });
       setTasks((prev) => [...prev, newTask]);
     } catch (err) {
       showToast(err.message || "Couldn't create the task", "error");

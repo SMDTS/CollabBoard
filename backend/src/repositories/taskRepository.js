@@ -9,8 +9,8 @@ export function findById(id) {
   return tasks.find((t) => t.id === id);
 }
 
-export function create({ title, assignee, status, dueDate, description, boardId }) {
-  const task = { id: bumpId(), title, assignee, status, dueDate, description, boardId };
+export function create({ title, assignee, status, dueDate, description }) {
+  const task = { id: bumpId(), title, assignee, status, dueDate, description };
   tasks.push(task);
   return task;
 }

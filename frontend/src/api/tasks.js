@@ -5,10 +5,10 @@ export function fetchTasks() {
   return apiFetch("/api/tasks");
 }
 
-export function createTask({ title, assignee, status, dueDate, boardId }) {
+export function createTask({ title, assignee, status, dueDate }) {
   return apiFetch("/api/tasks", {
     method: "POST",
-    body: JSON.stringify({ title, assignee, status, dueDate, boardId }),
+    body: JSON.stringify({ title, assignee, status, dueDate }),
   });
 }
 

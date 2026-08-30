@@ -1,6 +1,7 @@
+// DashboardPage.jsx
 import { Link } from "react-router-dom";
 import { useTasks } from "../context/TasksContext";
-import mockBoards from "../data/mockBoards";
+import { useBoards } from "../context/BoardsContext";
 import BubbleBackground from "../components/BubbleBackground";
 
 const STATUSES = ["To Do", "Doing", "Done"];
@@ -60,6 +61,7 @@ function StatIcon({ name }) {
 }
 
 function DashboardPage() {
+  const { boards } = useBoards();
   const mockTasks = useTasks();
   const total = mockTasks.length;
   const counts = STATUSES.reduce((acc, status) => {
@@ -102,7 +104,7 @@ function DashboardPage() {
         <section>
           <h2 className="dash-section__title">Your boards</h2>
           <div className="dash-boards">
-            {mockBoards.map((board, i) => (
+            {boards.map((board, i) => (
               <Link
                 to={`/boards/${board.id}`}
                 key={board.id}
@@ -111,7 +113,6 @@ function DashboardPage() {
                 <div className="dash-board-card__top">
                   <span className="dash-board-card__dot" />
                   <span className="dash-board-card__name">{board.name}</span>
-                  <span className="dash-board-card__count">{board.taskCount} tasks</span>
                 </div>
                 <p className="dash-board-card__desc">{board.description}</p>
               </Link>

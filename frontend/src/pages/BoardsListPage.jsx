@@ -1,7 +1,10 @@
+// BoardsListPage.jsx
 import { Link } from "react-router-dom";
-import mockBoards from "../data/mockBoards";
+import { useBoards, useBoardsActions } from "../context/BoardsContext";
 import { useToast } from "../context/ToastContext";
 
+// Colors match --ft-violet, --ft-sky, --ft-iris-deep in src/styles/auth.css,
+// so board identity ties back to the exact same palette as Login/Signup.
 const ACCENTS = ["board-accent--violet", "board-accent--sky", "board-accent--iris-deep"];
 
 function initials(name) {
@@ -14,35 +17,48 @@ function initials(name) {
 }
 
 function BoardsListPage() {
+  const { boards, isLoading, error } = useBoards();
+  const { addBoard } = useBoardsActions();
   const showToast = useToast();
+
+  async function handleNewBoard() {
+    const name = window.prompt("Board name?");
+    if (!name?.trim()) return;
+    try {
+      await addBoard(name.trim());
+      showToast(`Created "${name.trim()}"`, "success");
+    } catch (err) {
+      showToast(err.message || "Couldn't create the board", "error");
+    }
+  }
+
   return (
     <div className="page-shell">
       <h1 className="page-shell__title">Your Boards</h1>
       <p className="page-shell__subtitle">Pick a board to open it.</p>
 
-      <div className="boards-list">
-        {mockBoards.map((board, i) => (
-          <Link to={`/boards/${board.id}`} key={board.id} className={`board-tile ${ACCENTS[i % ACCENTS.length]}`}>
-            <div className="board-tile__top">
-              <div className="board-tile__avatar">{initials(board.name)}</div>
-              <span className="board-tile__count">{board.taskCount} tasks</span>
-            </div>
-            <h2 className="board-tile__name">{board.name}</h2>
-            <p className="board-tile__desc">{board.description}</p>
-            <span className="board-tile__cta">Open board →</span>
-          </Link>
-        ))}
+      {isLoading && <p className="page-shell__subtitle">Loading boards…</p>}
+      {error && <p className="ft-error" style={{ maxWidth: 320 }}>Couldn't load boards: {error}</p>}
 
-        {}
-        <button
-          type="button"
-          className="board-tile board-tile--new"
-          onClick={() => showToast("Creating boards needs the database (M3) — coming soon")}
-        >
-          <span className="board-tile__new-icon">+</span>
-          New board
-        </button>
-      </div>
+      {!isLoading && !error && (
+        <div className="boards-list">
+          {boards.map((board, i) => (
+            <Link to={`/boards/${board.id}`} key={board.id} className={`board-tile ${ACCENTS[i % ACCENTS.length]}`}>
+              <div className="board-tile__top">
+                <div className="board-tile__avatar">{initials(board.name)}</div>
+              </div>
+              <h2 className="board-tile__name">{board.name}</h2>
+              <p className="board-tile__desc">{board.description}</p>
+              <span className="board-tile__cta">Open board →</span>
+            </Link>
+          ))}
+
+          <button type="button" className="board-tile board-tile--new" onClick={handleNewBoard}>
+            <span className="board-tile__new-icon">+</span>
+            New board
+          </button>
+        </div>
+      )}
     </div>
   );
 }

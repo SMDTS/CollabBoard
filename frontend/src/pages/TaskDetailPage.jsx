@@ -1,7 +1,13 @@
+// TaskDetailPage.jsx
+// Full standalone view of a task, reached via /tasks/:id (e.g. from My
+// Tasks, or a shared link). Distinct from TaskDetailPanel, which is the
+// quick slide-in editor opened from the board itself — this page has more
+// room, so it also surfaces a description field the panel doesn't.
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { useTasks, useTasksActions } from "../context/TasksContext";
 import { useToast } from "../context/ToastContext";
-import mockTeam from "../data/mockTeam";
+import { useUsers } from "../context/UsersContext";
+import { avatarColor } from "../utils/avatarColor";
 
 const STATUSES = ["To Do", "Doing", "Done"];
 
@@ -9,12 +15,6 @@ const STATUS_ACCENT = {
   "To Do": "var(--cb-violet)",
   Doing: "var(--cb-sky)",
   Done: "var(--cb-success)",
-};
-
-const ASSIGNEE_COLORS = {
-  Sarah: "var(--cb-violet)",
-  Jordan: "var(--cb-sky)",
-  Priya: "var(--cb-success)",
 };
 
 function initials(name) {
@@ -25,6 +25,7 @@ function TaskDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const tasks = useTasks();
+  const { users } = useUsers();
   const { updateTask, deleteTask, moveTask } = useTasksActions();
   const showToast = useToast();
 
@@ -86,7 +87,7 @@ function TaskDetailPage() {
           <div className="task-detail__field">
             <span className="task-detail__label">Assignee</span>
             <div className="task-detail__assignee-group">
-              {mockTeam.map((m) => (
+              {users.map((m) => (
                 <button
                   key={m.id}
                   className={`task-detail__assignee-btn ${task.assignee === m.name ? "task-detail__assignee-btn--active" : ""}`}
@@ -95,7 +96,7 @@ function TaskDetailPage() {
                 >
                   <span
                     className="task-detail__assignee-avatar"
-                    style={{ background: ASSIGNEE_COLORS[m.name] || "var(--cb-text-muted)" }}
+                    style={{ background: avatarColor(m.name) }}
                   >
                     {initials(m.name)}
                   </span>
