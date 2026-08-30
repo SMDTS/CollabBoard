@@ -1,15 +1,11 @@
+// BoardPage.jsx
 import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import mockBoards from "../data/mockBoards";
+import { useBoards } from "../context/BoardsContext";
 import { useTasks } from "../context/TasksContext";
 import Board from "../components/Board";
 import TaskDetailPanel from "../components/TaskDetailPanel";
-
-const ASSIGNEE_COLORS = {
-  Sarah: "var(--cb-violet)",
-  Jordan: "var(--cb-sky)",
-  Priya: "var(--cb-success)",
-};
+import { avatarColor } from "../utils/avatarColor";
 
 function initials(name) {
   return name
@@ -22,9 +18,18 @@ function initials(name) {
 
 function BoardPage() {
   const { boardId } = useParams();
-  const board = mockBoards.find((b) => b.id === boardId);
+  const { boards, isLoading } = useBoards();
+  const board = boards.find((b) => b.id === Number(boardId));
   const tasks = useTasks();
   const [selectedTaskId, setSelectedTaskId] = useState(null);
+
+  if (isLoading) {
+    return (
+      <div className="page-shell">
+        <p className="page-shell__subtitle">Loading board…</p>
+      </div>
+    );
+  }
 
   if (!board) {
     return (
@@ -38,12 +43,11 @@ function BoardPage() {
     );
   }
 
-  // TODO (M3 owner): tasks are still the same shared mock set regardless of
-  // board — swap for real per-board data once the backend/database exist.
-  const doneCount = tasks.filter((t) => t.status === "Done").length;
-  const totalCount = tasks.length;
+  const boardTasks = tasks.filter((t) => t.boardId === Number(boardId));
+  const doneCount = boardTasks.filter((t) => t.status === "Done").length;
+  const totalCount = boardTasks.length;
   const pct = totalCount ? Math.round((doneCount / totalCount) * 100) : 0;
-  const assignees = [...new Set(tasks.map((t) => t.assignee))];
+  const assignees = [...new Set(boardTasks.map((t) => t.assignee))];
 
   return (
     <div className="page-shell">
@@ -63,7 +67,7 @@ function BoardPage() {
             <div
               key={name}
               className="board-page__person"
-              style={{ background: ASSIGNEE_COLORS[name] || "var(--cb-text-muted)" }}
+              style={{ background: avatarColor(name) }}
               title={name}
             >
               {initials(name)}
@@ -81,7 +85,7 @@ function BoardPage() {
         </div>
       </div>
 
-      <Board onOpenTask={setSelectedTaskId} />
+      <Board boardId={Number(boardId)} onOpenTask={setSelectedTaskId} />
 
       {selectedTaskId && <TaskDetailPanel taskId={selectedTaskId} onClose={() => setSelectedTaskId(null)} />}
     </div>

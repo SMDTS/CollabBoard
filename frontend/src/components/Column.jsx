@@ -8,7 +8,7 @@ const STATUS_THEME = {
   Done: { accent: "var(--cb-success)", tint: "var(--cb-done-tint)" },
 };
 
-function Column({ title, children, onOpenTask }) {
+function Column({ title, children, boardId }) {
   const { moveTask, addTask } = useTasksActions();
   const [isDragOver, setIsDragOver] = useState(false);
   const [draft, setDraft] = useState("");
@@ -34,13 +34,13 @@ function Column({ title, children, onOpenTask }) {
 
   function handleEnter() {
     if (!draft.trim()) return;
-    addTask(title, draft);
+    addTask(title, draft, boardId);
     setDraft("");
     // Stays open so typing several cards in a row doesn't need re-clicking.
   }
 
   function handleBlur() {
-    if (draft.trim()) addTask(title, draft);
+    if (draft.trim()) addTask(title, draft, boardId);
     setDraft("");
     setIsAdding(false);
   }

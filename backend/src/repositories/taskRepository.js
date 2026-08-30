@@ -1,3 +1,4 @@
+// src/repositories/taskRepository.js
 import { tasks, bumpId } from "../data/tasks.js";
 
 export function findAll() {
@@ -8,8 +9,8 @@ export function findById(id) {
   return tasks.find((t) => t.id === id);
 }
 
-export function create({ title, assignee, status, dueDate }) {
-  const task = { id: bumpId(), title, assignee, status, dueDate };
+export function create({ title, assignee, status, dueDate, description, boardId }) {
+  const task = { id: bumpId(), title, assignee, status, dueDate, description, boardId };
   tasks.push(task);
   return task;
 }
