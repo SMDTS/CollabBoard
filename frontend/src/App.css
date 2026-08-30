@@ -2236,3 +2236,15 @@ body {
   }
 }
 
+
+/* ===== App-level auth loading state ===== */
+.app-loading {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--cb-bg);
+  color: var(--cb-text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+}

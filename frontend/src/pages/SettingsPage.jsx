@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
+import { useAuth } from "../context/AuthContext";
 import { useTasks } from "../context/TasksContext";
 import { useToast } from "../context/ToastContext";
 import { useBoards } from "../context/BoardsContext";
@@ -22,12 +23,13 @@ const SHORTCUTS = [
 function SettingsPage() {
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
+  const { user, logout } = useAuth();
   const mockTasks = useTasks();
   const { boards } = useBoards();
   const showToast = useToast();
 
-  const [name, setName] = useState(CURRENT_USER.name);
-  const [email, setEmail] = useState(CURRENT_USER.email);
+  const [name, setName] = useState(user?.name || "");
+  const [email, setEmail] = useState(user?.email || "");
   const [notifyEmail, setNotifyEmail] = useState(true);
   const [notifyActivity, setNotifyActivity] = useState(true);
   const [notifyWeekly, setNotifyWeekly] = useState(false);
