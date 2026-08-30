@@ -58,7 +58,7 @@ function SettingsPage() {
       user: CURRENT_USER,
       boards: boards,
       tasks: mockTasks,
-      team: mockTeam,
+      team: users,
     };
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);

@@ -5,12 +5,7 @@ import { useBoards } from "../context/BoardsContext";
 import { useTasks } from "../context/TasksContext";
 import Board from "../components/Board";
 import TaskDetailPanel from "../components/TaskDetailPanel";
-
-const ASSIGNEE_COLORS = {
-  Sarah: "var(--cb-violet)",
-  Jordan: "var(--cb-sky)",
-  Priya: "var(--cb-success)",
-};
+import { avatarColor } from "../utils/avatarColor";
 
 function initials(name) {
   return name
@@ -73,7 +68,7 @@ function BoardPage() {
             <div
               key={name}
               className="board-page__person"
-              style={{ background: ASSIGNEE_COLORS[name] || "var(--cb-text-muted)" }}
+              style={{ background: avatarColor(name) }}
               title={name}
             >
               {initials(name)}
