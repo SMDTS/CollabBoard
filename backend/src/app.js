@@ -1,3 +1,4 @@
+// src/app.js
 import express from "express";
 import cors from "cors";
 import { config } from "./config.js";
@@ -6,9 +7,14 @@ import { requestLogger } from "./middleware/requestLogger.js";
 import { notFoundHandler, errorHandler } from "./middleware/errorHandler.js";
 import taskRoutes from "./routes/taskRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
+import boardRoutes from "./routes/boardRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
 
 const app = express();
 
+// Order matters — see Session 2 slide 30. CORS and body parsing must come
+// before any route reads req.body; the error handler must be registered
+// last, after every route.
 app.use(cors({ origin: config.clientOrigin, credentials: true }));
 app.use(express.json({ limit: "100kb" }));
 app.use(requestId);
@@ -20,8 +26,10 @@ app.get("/api/health", (req, res) => {
 
 app.use("/api/tasks", taskRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/boards", boardRoutes);
+app.use("/api/users", userRoutes);
 
-app.use(notFoundHandler); 
-app.use(errorHandler); 
+app.use(notFoundHandler); // no route matched
+app.use(errorHandler); // LAST, always
 
 export default app;
