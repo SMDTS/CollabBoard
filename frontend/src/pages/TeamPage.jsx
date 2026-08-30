@@ -1,6 +1,7 @@
+// TeamPage.jsx
 import { useState } from "react";
 import mockTeam from "../data/mockTeam";
-import mockTasks from "../data/mockTasks";
+import { useTasks } from "../context/TasksContext";
 import { useToast } from "../context/ToastContext";
 
 const ACCENTS = ["team-accent--violet", "team-accent--sky", "team-accent--green"];
@@ -18,6 +19,7 @@ function initials(name) {
 function TeamPage() {
   const [query, setQuery] = useState("");
   const showToast = useToast();
+  const mockTasks = useTasks();
 
   const filtered = mockTeam.filter(
     (m) => m.name.toLowerCase().includes(query.toLowerCase()) || m.role.toLowerCase().includes(query.toLowerCase())
@@ -79,11 +81,11 @@ function TeamPage() {
           );
         })}
 
-        {/* Invite button */}
+        {/* TODO (M2 owner): wire this up to a real invite flow once auth exists. */}
         <button
           type="button"
           className="team-card team-card--invite"
-          onClick={() => showToast("coming soon")}
+          onClick={() => showToast("Invites need real auth (M2) — coming soon")}
         >
           <span className="team-card__invite-icon">+</span>
           Invite member
