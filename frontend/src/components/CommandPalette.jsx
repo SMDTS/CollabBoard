@@ -1,7 +1,10 @@
+// CommandPalette.jsx
+// Controlled from App.jsx so both the Ctrl+K shortcut and the TopBar's
+// search bar open the exact same overlay, instead of duplicating search.
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTasks } from "../context/TasksContext";
-import mockBoards from "../data/mockBoards";
+import { useBoards } from "../context/BoardsContext";
 
 const PAGES = [
   { label: "Boards", path: "/" },
@@ -16,6 +19,7 @@ function CommandPalette({ isOpen, onOpenChange }) {
   const navigate = useNavigate();
   const inputRef = useRef(null);
   const tasks = useTasks();
+  const { boards } = useBoards();
 
   useEffect(() => {
     function handleKeyDown(e) {
@@ -78,7 +82,11 @@ function CommandPalette({ isOpen, onOpenChange }) {
               {matchedTasks.map((t) => (
                 // TODO: once boards have real distinct data, deep-link to
                 // the exact board this task lives on instead of the first one.
-                <button key={t.id} className="cmdk__item" onClick={() => go(`/boards/${mockBoards[0].id}`)}>
+                <button
+                  key={t.id}
+                  className="cmdk__item"
+                  onClick={() => boards[0] && go(`/boards/${boards[0].id}`)}
+                >
                   {t.title}
                   <span className="cmdk__item-meta">{t.status}</span>
                 </button>
