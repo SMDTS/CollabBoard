@@ -5,16 +5,16 @@ import TaskCard from "./TaskCard";
 
 const STATUSES = ["To Do", "Doing", "Done"];
 
-function Board({ onOpenTask }) {
+function Board({ boardId, onOpenTask }) {
   const tasks = useTasks();
 
   return (
     <div className="board">
       {STATUSES.map((status) => {
-        const tasksForStatus = tasks.filter((task) => task.status === status);
+        const tasksForStatus = tasks.filter((task) => task.boardId === boardId && task.status === status);
 
         return (
-          <Column key={status} title={status}>
+          <Column key={status} title={status} boardId={boardId}>
             {tasksForStatus.map((task) => (
               <TaskCard
                 key={task.id}

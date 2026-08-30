@@ -43,12 +43,11 @@ function BoardPage() {
     );
   }
 
-  // TODO (M3 owner): tasks are still the same shared mock set regardless of
-  // board — swap for real per-board data once the backend/database exist.
-  const doneCount = tasks.filter((t) => t.status === "Done").length;
-  const totalCount = tasks.length;
+  const boardTasks = tasks.filter((t) => t.boardId === Number(boardId));
+  const doneCount = boardTasks.filter((t) => t.status === "Done").length;
+  const totalCount = boardTasks.length;
   const pct = totalCount ? Math.round((doneCount / totalCount) * 100) : 0;
-  const assignees = [...new Set(tasks.map((t) => t.assignee))];
+  const assignees = [...new Set(boardTasks.map((t) => t.assignee))];
 
   return (
     <div className="page-shell">
@@ -86,7 +85,7 @@ function BoardPage() {
         </div>
       </div>
 
-      <Board onOpenTask={setSelectedTaskId} />
+      <Board boardId={Number(boardId)} onOpenTask={setSelectedTaskId} />
 
       {selectedTaskId && <TaskDetailPanel taskId={selectedTaskId} onClose={() => setSelectedTaskId(null)} />}
     </div>
