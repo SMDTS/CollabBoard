@@ -1,10 +1,15 @@
+// TopBar.jsx
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
+import { useAuth } from "../context/AuthContext";
 
-const CURRENT_USER = { name: "Dinith", initials: "D" };
-
+// TODO (M5 owner): replace with a real notification count once Socket.io/activity exists.
 const NOTIFICATION_COUNT = 3;
+
+function initials(name) {
+  return (name || "?").slice(0, 2).toUpperCase();
+}
 
 function formatDateTime(date) {
   const dateStr = date.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
@@ -15,9 +20,16 @@ function formatDateTime(date) {
 function TopBar({ onOpenSearch }) {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
+  const { user, logout } = useAuth();
   const [now, setNow] = useState(new Date());
   const [menuOpen, setMenuOpen] = useState(false);
   const isMac = typeof navigator !== "undefined" && /Mac/.test(navigator.platform);
+
+  function handleLogout() {
+    setMenuOpen(false);
+    logout();
+    navigate("/login");
+  }
 
   useEffect(() => {
     const interval = setInterval(() => setNow(new Date()), 1000 * 30);
@@ -66,12 +78,12 @@ function TopBar({ onOpenSearch }) {
 
         <div className="topbar__profile">
           <button className="topbar__avatar" onClick={() => setMenuOpen((prev) => !prev)} aria-label="Profile menu">
-            {CURRENT_USER.initials}
+            {initials(user?.name)}
           </button>
 
           {menuOpen && (
             <div className="topbar__menu" onMouseLeave={() => setMenuOpen(false)}>
-              <div className="topbar__menu-name">{CURRENT_USER.name}</div>
+              <div className="topbar__menu-name">{user?.name || "Account"}</div>
               <button
                 className="topbar__menu-item"
                 onClick={() => {
@@ -81,13 +93,7 @@ function TopBar({ onOpenSearch }) {
               >
                 Settings
               </button>
-              <button
-                className="topbar__menu-item topbar__menu-item--danger"
-                onClick={() => {
-                  setMenuOpen(false);
-                  navigate("/login");
-                }}
-              >
+              <button className="topbar__menu-item topbar__menu-item--danger" onClick={handleLogout}>
                 Log out
               </button>
             </div>
