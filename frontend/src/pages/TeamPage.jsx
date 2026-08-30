@@ -1,6 +1,6 @@
 // TeamPage.jsx
 import { useState } from "react";
-import { useUsers } from "../context/UsersContext";
+import mockTeam from "../data/mockTeam";
 import { useTasks } from "../context/TasksContext";
 import { useToast } from "../context/ToastContext";
 
@@ -17,8 +17,7 @@ function initials(name) {
 function TeamPage() {
   const [query, setQuery] = useState("");
   const showToast = useToast();
-  const { users, isLoading, error } = useUsers();
-  const tasks = useTasks();
+  const mockTasks = useTasks();
 
   const filtered = users.filter((u) => u.name.toLowerCase().includes(query.toLowerCase()));
 
@@ -80,18 +79,16 @@ function TeamPage() {
             );
           })}
 
-          {/* TODO: a real "invite" flow needs an email service + invite
-              tokens. Right now, people join by registering themselves. */}
-          <button
-            type="button"
-            className="team-card team-card--invite"
-            onClick={() => showToast("For now, teammates join by signing up themselves at /signup")}
-          >
-            <span className="team-card__invite-icon">+</span>
-            Invite member
-          </button>
-        </div>
-      )}
+        {/* TODO (M2 owner): wire this up to a real invite flow once auth exists. */}
+        <button
+          type="button"
+          className="team-card team-card--invite"
+          onClick={() => showToast("Invites need real auth (M2) — coming soon")}
+        >
+          <span className="team-card__invite-icon">+</span>
+          Invite member
+        </button>
+      </div>
     </div>
   );
 }

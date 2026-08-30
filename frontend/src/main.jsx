@@ -5,6 +5,7 @@ import App from "./App";
 import { ThemeProvider } from "./context/ThemeContext";
 import { ToastProvider } from "./context/ToastContext";
 import { AuthProvider } from "./context/AuthContext";
+import { BoardsProvider } from "./context/BoardsContext";
 import "./App.css";
 
 // TasksProvider, BoardsProvider, and UsersProvider live inside App.jsx now,
@@ -18,9 +19,13 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     <ThemeProvider>
       <ToastProvider>
         <AuthProvider>
-          <BrowserRouter>
-            <App />
-          </BrowserRouter>
+          <BoardsProvider>
+            <TasksProvider>
+              <BrowserRouter>
+                <App />
+              </BrowserRouter>
+            </TasksProvider>
+          </BoardsProvider>
         </AuthProvider>
       </ToastProvider>
     </ThemeProvider>
