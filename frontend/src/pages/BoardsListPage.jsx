@@ -3,8 +3,7 @@ import { Link } from "react-router-dom";
 import { useBoards, useBoardsActions } from "../context/BoardsContext";
 import { useToast } from "../context/ToastContext";
 
-// Colors match --ft-violet, --ft-sky, --ft-iris-deep in src/styles/auth.css,
-// so board identity ties back to the exact same palette as Login/Signup.
+
 const ACCENTS = ["board-accent--violet", "board-accent--sky", "board-accent--iris-deep"];
 
 function initials(name) {

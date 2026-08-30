@@ -9,12 +9,11 @@ export function findById(id) {
   return tasks.find((t) => t.id === id);
 }
 
-export function create({ title, assignee, status, dueDate, description }) {
-  const task = { id: bumpId(), title, assignee, status, dueDate, description };
+export function create({ title, assignee, status, dueDate, description, boardId }) {
+  const task = { id: bumpId(), title, assignee, status, dueDate, description, boardId };
   tasks.push(task);
   return task;
 }
-
 export function update(id, patch) {
   const task = findById(id);
   if (!task) return null;

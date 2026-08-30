@@ -8,8 +8,6 @@ export const config = {
 };
 
 if (!config.jwtSecret) {
-  // Fail loudly at startup rather than silently signing tokens with
-  // "undefined" — a missing secret is a configuration bug, not something
-  // to limp along with.
+  
   throw new Error("Missing JWT_SECRET in .env — copy .env.example to .env and fill it in.");
 }

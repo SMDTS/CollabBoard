@@ -5,6 +5,9 @@ import Sidebar from "./components/Sidebar";
 import TopBar from "./components/TopBar";
 import CommandPalette from "./components/CommandPalette";
 import { useAuth } from "./context/AuthContext";
+import { TasksProvider } from "./context/TasksContext";
+import { BoardsProvider } from "./context/BoardsContext";
+import { UsersProvider } from "./context/UsersContext";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import BoardsListPage from "./pages/BoardsListPage";
@@ -24,7 +27,7 @@ function App() {
   const { isAuthenticated, isLoading } = useAuth();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
-  // Login/Signup render full-screen with their own design, no app shell.
+
   if (isAuthPage) {
     return (
       <Routes>
@@ -34,8 +37,7 @@ function App() {
     );
   }
 
-  // Still checking whether a stored token is valid — avoid flashing a
-  // redirect to /login before we actually know the answer.
+
   if (isLoading) {
     return <div className="app-loading">Loading…</div>;
   }

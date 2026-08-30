@@ -1,13 +1,10 @@
 // TeamPage.jsx
 import { useState } from "react";
-import mockTeam from "../data/mockTeam";
+import { useUsers } from "../context/UsersContext";
 import { useTasks } from "../context/TasksContext";
 import { useToast } from "../context/ToastContext";
 
-// Real registered users only have { id, name, email } — no role or online
-// status, since nothing in registration ever collects those. Cycling
-// through the same 3 accent colors as before, just as decoration now
-// rather than tied to a real "role" field.
+
 const ACCENTS = ["team-accent--violet", "team-accent--sky", "team-accent--green"];
 
 function initials(name) {
@@ -17,7 +14,8 @@ function initials(name) {
 function TeamPage() {
   const [query, setQuery] = useState("");
   const showToast = useToast();
-  const mockTasks = useTasks();
+  const { users, isLoading, error } = useUsers();
+  const tasks = useTasks();
 
   const filtered = users.filter((u) => u.name.toLowerCase().includes(query.toLowerCase()));
 
@@ -79,16 +77,18 @@ function TeamPage() {
             );
           })}
 
-        {/* TODO (M2 owner): wire this up to a real invite flow once auth exists. */}
-        <button
-          type="button"
-          className="team-card team-card--invite"
-          onClick={() => showToast("Invites need real auth (M2) — coming soon")}
-        >
-          <span className="team-card__invite-icon">+</span>
-          Invite member
-        </button>
-      </div>
+          {/* TODO: a real "invite" flow needs an email service + invite
+              tokens. Right now, people join by registering themselves. */}
+          <button
+            type="button"
+            className="team-card team-card--invite"
+            onClick={() => showToast("For now, teammates join by signing up themselves at /signup")}
+          >
+            <span className="team-card__invite-icon">+</span>
+            Invite member
+          </button>
+        </div>
+      )}
     </div>
   );
 }

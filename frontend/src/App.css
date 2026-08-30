@@ -5,9 +5,7 @@
 }
 
 :root {
-  /* Purple as the primary accent — matches the login page's decorative
-     hero panel (~#8c78c8, sampled directly from the screenshot), used
-     throughout instead of the neutral charcoal from an earlier pass. */
+
   --cb-bg: #d3cfe0;
   --cb-surface: #ffffff;
   --cb-surface-sunken: #fbfbfe;

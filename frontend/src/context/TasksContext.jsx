@@ -1,10 +1,3 @@
-// TasksContext.jsx
-// Fetches real tasks from the backend on mount instead of seeding from the
-// now-deleted mockTasks.js. Mutations (add/move/delete/update) are
-// OPTIMISTIC: the UI updates immediately for a snappy drag-and-drop feel,
-// then the real request fires in the background — if it fails, the change
-// is rolled back and a toast explains why, rather than silently drifting
-// out of sync with the server.
 import { createContext, useContext, useState, useEffect } from "react";
 import * as tasksApi from "../api/tasks.js";
 import { useToast } from "./ToastContext.jsx";
@@ -24,11 +17,11 @@ export function TasksProvider({ children }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const addTask = async (status, title, assignee = "Sarah") => {
+  const addTask = async (status, title, boardId, assignee = "Sarah") => {
     const trimmed = title.trim();
     if (!trimmed) return;
     try {
-      const newTask = await tasksApi.createTask({ title: trimmed, assignee, status });
+      const newTask = await tasksApi.createTask({ title: trimmed, assignee, status, boardId });
       setTasks((prev) => [...prev, newTask]);
     } catch (err) {
       showToast(err.message || "Couldn't create the task", "error");

@@ -1,7 +1,3 @@
-// UsersContext.jsx
-// Read-only on purpose — there's no add/edit/delete because users are
-// created via registration (AuthContext), not managed here. This just
-// gives every page "who's on the team" without each fetching separately.
 import { createContext, useContext, useState, useEffect } from "react";
 import * as usersApi from "../api/users.js";
 

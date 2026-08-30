@@ -1,6 +1,4 @@
-// src/data/tasks.js
-// Temporary in-memory store, standing in for a database until M3. This is
-// the ONLY file the repository layer is allowed to touch directly.
+
 export const tasks = [
   { id: 1, title: "Set up project repository", assignee: "Sarah", status: "To Do", dueDate: "Aug 12", boardId: 1 },
   { id: 2, title: "Draft onboarding wireframes", assignee: "Jordan", status: "To Do", dueDate: "Aug 14", boardId: 1 },
