@@ -1,11 +1,13 @@
+// SettingsPage.jsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
 import { useTasks } from "../context/TasksContext";
 import { useToast } from "../context/ToastContext";
-import mockBoards from "../data/mockBoards";
+import { useBoards } from "../context/BoardsContext";
 import mockTeam from "../data/mockTeam";
 
+// TODO (M2 owner): replace with the real logged-in user's data once auth exists.
 const CURRENT_USER = { name: "Sarah", email: "sarah@collabboard.dev" };
 
 const SHORTCUTS = [
@@ -21,6 +23,7 @@ function SettingsPage() {
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
   const mockTasks = useTasks();
+  const { boards } = useBoards();
   const showToast = useToast();
 
   const [name, setName] = useState(CURRENT_USER.name);
@@ -33,23 +36,25 @@ function SettingsPage() {
 
   function handleSaveAccount(e) {
     e.preventDefault();
-
+    // TODO (M2 owner): PATCH /api/users/me with { name, email }
     showToast("Account changes saved locally (not persisted yet)", "success");
   }
 
   function handleLogout() {
-
+    // TODO (M2 owner): clear the real auth token/session before navigating.
     navigate("/login");
   }
 
-  const [deleteStep, setDeleteStep] = useState(0); 
+  const [deleteStep, setDeleteStep] = useState(0); // 0 = idle, 1 = confirming
 
   function handleExportData() {
-
+    // Real client-side export — everything here is mock data today, but the
+    // export mechanism itself (build JSON, trigger a download) is genuine
+    // and doesn't need a backend to work.
     const payload = {
       exportedAt: new Date().toISOString(),
       user: CURRENT_USER,
-      boards: mockBoards,
+      boards: boards,
       tasks: mockTasks,
       team: mockTeam,
     };
@@ -70,7 +75,9 @@ function SettingsPage() {
       setDeleteStep(1);
       return;
     }
-
+    // TODO (M2 owner): real DELETE /api/users/me once auth + a database exist.
+    // For now this simulates the end state of account deletion: signed out,
+    // preference reset, sent to the login screen.
     localStorage.removeItem("collabboard-theme");
     navigate("/login");
   }

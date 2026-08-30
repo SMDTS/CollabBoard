@@ -1,6 +1,7 @@
+// BoardPage.jsx
 import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import mockBoards from "../data/mockBoards";
+import { useBoards } from "../context/BoardsContext";
 import { useTasks } from "../context/TasksContext";
 import Board from "../components/Board";
 import TaskDetailPanel from "../components/TaskDetailPanel";
@@ -22,9 +23,18 @@ function initials(name) {
 
 function BoardPage() {
   const { boardId } = useParams();
-  const board = mockBoards.find((b) => b.id === boardId);
+  const { boards, isLoading } = useBoards();
+  const board = boards.find((b) => b.id === Number(boardId));
   const tasks = useTasks();
   const [selectedTaskId, setSelectedTaskId] = useState(null);
+
+  if (isLoading) {
+    return (
+      <div className="page-shell">
+        <p className="page-shell__subtitle">Loading board…</p>
+      </div>
+    );
+  }
 
   if (!board) {
     return (
