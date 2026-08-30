@@ -1,0 +1,95 @@
+// BoardPage.jsx
+import { useState } from "react";
+import { useParams, Link } from "react-router-dom";
+import { useBoards } from "../context/BoardsContext";
+import { useTasks } from "../context/TasksContext";
+import Board from "../components/Board";
+import TaskDetailPanel from "../components/TaskDetailPanel";
+import { avatarColor } from "../utils/avatarColor";
+
+function initials(name) {
+  return name
+    .split(" ")
+    .map((w) => w[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+}
+
+function BoardPage() {
+  const { boardId } = useParams();
+  const { boards, isLoading } = useBoards();
+  const board = boards.find((b) => b.id === Number(boardId));
+  const tasks = useTasks();
+  const [selectedTaskId, setSelectedTaskId] = useState(null);
+
+  if (isLoading) {
+    return (
+      <div className="page-shell">
+        <p className="page-shell__subtitle">Loading board…</p>
+      </div>
+    );
+  }
+
+  if (!board) {
+    return (
+      <div className="page-shell">
+        <p>No board found with id "{boardId}".</p>
+        <Link to="/boards" className="back-link">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" /></svg>
+          Back to boards
+        </Link>
+      </div>
+    );
+  }
+
+  const boardTasks = tasks.filter((t) => t.boardId === Number(boardId));
+  const doneCount = boardTasks.filter((t) => t.status === "Done").length;
+  const totalCount = boardTasks.length;
+  const pct = totalCount ? Math.round((doneCount / totalCount) * 100) : 0;
+  const assignees = [...new Set(boardTasks.map((t) => t.assignee))];
+
+  return (
+    <div className="page-shell">
+      <Link to="/boards" className="back-link">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" /></svg>
+          Back to boards
+      </Link>
+
+      <div className="board-page__header">
+        <div className="board-page__avatar">{initials(board.name)}</div>
+        <div className="board-page__heading">
+          <h1 className="board-page__title">{board.name}</h1>
+        </div>
+
+        <div className="board-page__people">
+          {assignees.map((name) => (
+            <div
+              key={name}
+              className="board-page__person"
+              style={{ background: avatarColor(name) }}
+              title={name}
+            >
+              {initials(name)}
+            </div>
+          ))}
+        </div>
+
+        <div className="board-page__progress">
+          <div className="board-page__progress-track">
+            <div className="board-page__progress-fill" style={{ width: `${pct}%` }} />
+          </div>
+          <span className="board-page__progress-label">
+            {doneCount}/{totalCount} done
+          </span>
+        </div>
+      </div>
+
+      <Board boardId={Number(boardId)} onOpenTask={setSelectedTaskId} />
+
+      {selectedTaskId && <TaskDetailPanel taskId={selectedTaskId} onClose={() => setSelectedTaskId(null)} />}
+    </div>
+  );
+}
+
+export default BoardPage;
