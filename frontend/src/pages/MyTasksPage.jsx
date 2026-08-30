@@ -1,19 +1,24 @@
+// MyTasksPage.jsx
 import { Link } from "react-router-dom";
 import { useTasks } from "../context/TasksContext";
-
-const CURRENT_USER = "Dinith";
+import { useAuth } from "../context/AuthContext";
 
 const STATUSES = ["To Do", "Doing", "Done"];
 
 function MyTasksPage() {
   const tasks = useTasks();
-  const myTasks = tasks.filter((task) => task.assignee === CURRENT_USER);
+  const { user } = useAuth();
+  // Task assignees are still plain name strings (from the pre-auth mock
+  // data days), matched against the real logged-in user's name. This
+  // breaks if two people share a name — fine for now, worth revisiting
+  // once tasks are assigned by user id instead of name.
+  const myTasks = tasks.filter((task) => task.assignee === user?.name);
 
   return (
     <div className="page-shell">
       <h1 className="page-shell__title">My Tasks</h1>
       <p className="page-shell__subtitle">
-        Tasks assigned to <strong>{CURRENT_USER}</strong>.
+        Tasks assigned to <strong>{user?.name}</strong>.
       </p>
 
       {myTasks.length === 0 ? (
