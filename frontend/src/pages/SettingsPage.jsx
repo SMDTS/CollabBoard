@@ -8,6 +8,9 @@ import { useToast } from "../context/ToastContext";
 import { useBoards } from "../context/BoardsContext";
 import mockTeam from "../data/mockTeam";
 
+// TODO (M2 owner): replace with the real logged-in user's data once auth exists.
+const CURRENT_USER = { name: "Sarah", email: "sarah@collabboard.dev" };
+
 const SHORTCUTS = [
   { keys: "B", action: "Toggle sidebar" },
   { keys: "N", action: "New task on current board" },
@@ -40,7 +43,7 @@ function SettingsPage() {
   }
 
   function handleLogout() {
-    logout();
+    // TODO (M2 owner): clear the real auth token/session before navigating.
     navigate("/login");
   }
 
@@ -52,7 +55,7 @@ function SettingsPage() {
     // and doesn't need a backend to work.
     const payload = {
       exportedAt: new Date().toISOString(),
-      user: user,
+      user: CURRENT_USER,
       boards: boards,
       tasks: mockTasks,
       team: mockTeam,
@@ -74,10 +77,9 @@ function SettingsPage() {
       setDeleteStep(1);
       return;
     }
-    // TODO (M2 owner): real DELETE /api/users/me once that endpoint exists.
-    // For now this simulates the end state of account deletion: signed out
-    // for real (token cleared), preference reset, sent to the login screen.
-    logout();
+    // TODO (M2 owner): real DELETE /api/users/me once auth + a database exist.
+    // For now this simulates the end state of account deletion: signed out,
+    // preference reset, sent to the login screen.
     localStorage.removeItem("collabboard-theme");
     navigate("/login");
   }

@@ -6,6 +6,7 @@ import { ThemeProvider } from "./context/ThemeContext";
 import { TasksProvider } from "./context/TasksContext";
 import { ToastProvider } from "./context/ToastContext";
 import { AuthProvider } from "./context/AuthContext";
+import { BoardsProvider } from "./context/BoardsContext";
 import "./App.css";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
@@ -13,11 +14,13 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     <ThemeProvider>
       <ToastProvider>
         <AuthProvider>
-          <TasksProvider>
-            <BrowserRouter>
-              <App />
-            </BrowserRouter>
-          </TasksProvider>
+          <BoardsProvider>
+            <TasksProvider>
+              <BrowserRouter>
+                <App />
+              </BrowserRouter>
+            </TasksProvider>
+          </BoardsProvider>
         </AuthProvider>
       </ToastProvider>
     </ThemeProvider>
