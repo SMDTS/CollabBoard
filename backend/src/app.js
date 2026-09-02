@@ -9,6 +9,7 @@ import taskRoutes from "./routes/taskRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import boardRoutes from "./routes/boardRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
+import { getDbState } from "./db/connect.js";
 
 const app = express();
 
@@ -18,7 +19,7 @@ app.use(requestId);
 app.use(requestLogger);
 
 app.get("/api/health", (req, res) => {
-  res.json({ status: "ok", uptime: process.uptime() });
+  res.json({ status: "ok", uptime: process.uptime(), db: getDbState() });
 });
 
 app.use("/api/tasks", taskRoutes);
