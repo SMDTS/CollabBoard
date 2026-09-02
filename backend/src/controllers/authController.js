@@ -11,7 +11,7 @@ export const login = catchAsync(async (req, res) => {
   res.json(result);
 });
 
-export function me(req, res) {
-  const user = authService.getUserById(req.user.id);
+export const me = catchAsync(async (req, res) => {
+  const user = await authService.getUserById(req.user.id);
   res.json(user);
-}
+});

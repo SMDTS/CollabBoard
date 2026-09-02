@@ -1,20 +1,21 @@
 // src/repositories/userRepository.js
-import { users, bumpUserId } from "../data/users.js";
+import { User } from "../models/User.js";
+
+// Same 4 function names/signatures as the in-memory version — nothing
+// above this layer (authService, userService) needed to change at all.
 
 export function findByEmail(email) {
-  return users.find((u) => u.email === email);
+  return User.findOne({ email });
 }
 
 export function findAll() {
-  return users;
+  return User.find();
 }
 
 export function findById(id) {
-  return users.find((u) => u.id === id);
+  return User.findById(id);
 }
 
 export function create({ name, email, passwordHash }) {
-  const user = { id: bumpUserId(), name, email, passwordHash };
-  users.push(user);
-  return user;
+  return User.create({ name, email, passwordHash });
 }
