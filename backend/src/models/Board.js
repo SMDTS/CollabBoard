@@ -41,3 +41,5 @@ function transform(doc, ret) {
 
 boardSchema.set("toJSON", { transform });
 boardSchema.set("toObject", { transform });
+
+export const Board = mongoose.model("Board", boardSchema);
