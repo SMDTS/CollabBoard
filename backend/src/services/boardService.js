@@ -20,3 +20,8 @@ export async function updateBoard(id, patch) {
   if (!updated) throw new NotFoundError("Board");
   return updated;
 }
+
+export async function deleteBoard(id) {
+  const deleted = await boardRepository.remove(id);
+  if (!deleted) throw new NotFoundError("Board");
+}
