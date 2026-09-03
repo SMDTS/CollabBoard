@@ -25,3 +25,19 @@ const boardSchema = new Schema(
   },
   { timestamps: true }
 );
+
+function transform(doc, ret) {
+  ret.id = ret._id.toString();
+  delete ret._id;
+  delete ret.__v;
+  if (Array.isArray(ret.columns)) {
+    ret.columns = ret.columns.map((col) => {
+      const { _id, ...rest } = col;
+      return { id: _id?.toString?.() ?? _id, ...rest };
+    });
+  }
+  return ret;
+}
+
+boardSchema.set("toJSON", { transform });
+boardSchema.set("toObject", { transform });
