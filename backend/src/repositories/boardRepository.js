@@ -12,3 +12,7 @@ export async function findById(id) {
     throw err;
   }
 }
+
+export async function create({ name, description }) {
+  return Board.create({ name, description });
+}
