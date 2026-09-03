@@ -10,3 +10,7 @@ export async function getBoardById(id) {
   if (!board) throw new NotFoundError("Board");
   return board;
 }
+
+export async function createBoard(data) {
+  return boardRepository.create(data);
+}
