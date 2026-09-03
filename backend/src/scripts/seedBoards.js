@@ -1,4 +1,5 @@
-import { connectDB } from "../db/connect.js";
+import { config } from "../config.js";
+import { connectDb } from "../db/connect.js";
 import { Board } from "../models/Board.js";
 
 const exampleBoards = [
@@ -8,7 +9,7 @@ const exampleBoards = [
 ];
 
 async function seed() {
-  await connectDB();
+  await connectDb(config.mongoUri);
 
   for (const data of exampleBoards) {
     const exists = await Board.findOne({ name: data.name });
