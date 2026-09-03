@@ -10,3 +10,8 @@ export const getBoard = catchAsync(async (req, res) => {
   const board = await boardService.getBoardById(req.params.id);
   res.json(board);
 });
+
+export const createBoard = catchAsync(async (req, res) => {
+  const board = await boardService.createBoard(req.body);
+  res.status(201).json(board);
+});
