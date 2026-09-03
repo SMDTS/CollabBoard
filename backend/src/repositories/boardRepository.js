@@ -1,30 +1,40 @@
-// src/repositories/boardRepository.js
-import { boards, bumpBoardId } from "../data/boards.js";
+import { Board } from "../models/Board.js";
 
-export function findAll() {
-  return boards;
+export async function findAll() {
+  return Board.find().sort({ createdAt: 1 });
 }
 
-export function findById(id) {
-  return boards.find((b) => b.id === id);
+export async function findById(id) {
+  try {
+    return await Board.findById(id);
+  } catch (err) {
+    if (err.name === "CastError") return null;
+    throw err;
+  }
 }
 
-export function create({ name, description }) {
-  const board = { id: bumpBoardId(), name, description };
-  boards.push(board);
-  return board;
+export async function create({ name, description }) {
+  return Board.create({ name, description });
 }
 
-export function update(id, patch) {
-  const board = findById(id);
-  if (!board) return null;
-  Object.assign(board, patch);
-  return board;
+export async function update(id, patch) {
+  try {
+    return await Board.findByIdAndUpdate(id, patch, {
+      new: true,
+      runValidators: true,
+    });
+  } catch (err) {
+    if (err.name === "CastError") return null;
+    throw err;
+  }
 }
 
-export function remove(id) {
-  const index = boards.findIndex((b) => b.id === id);
-  if (index === -1) return false;
-  boards.splice(index, 1);
-  return true;
+export async function remove(id) {
+  try {
+    const deleted = await Board.findByIdAndDelete(id);
+    return Boolean(deleted);
+  } catch (err) {
+    if (err.name === "CastError") return false;
+    throw err;
+  }
 }
