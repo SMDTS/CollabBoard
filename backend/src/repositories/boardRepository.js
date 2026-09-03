@@ -28,3 +28,13 @@ export async function update(id, patch) {
     throw err;
   }
 }
+
+export async function remove(id) {
+  try {
+    const deleted = await Board.findByIdAndDelete(id);
+    return Boolean(deleted);
+  } catch (err) {
+    if (err.name === "CastError") return false;
+    throw err;
+  }
+}
