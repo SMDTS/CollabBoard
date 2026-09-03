@@ -14,3 +14,9 @@ export async function getBoardById(id) {
 export async function createBoard(data) {
   return boardRepository.create(data);
 }
+
+export async function updateBoard(id, patch) {
+  const updated = await boardRepository.update(id, patch);
+  if (!updated) throw new NotFoundError("Board");
+  return updated;
+}
