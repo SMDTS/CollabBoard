@@ -15,3 +15,8 @@ export const createBoard = catchAsync(async (req, res) => {
   const board = await boardService.createBoard(req.body);
   res.status(201).json(board);
 });
+
+export const updateBoard = catchAsync(async (req, res) => {
+  const board = await boardService.updateBoard(req.params.id, req.body);
+  res.json(board);
+}); 
