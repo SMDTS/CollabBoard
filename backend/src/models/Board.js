@@ -9,3 +9,19 @@ const columnSchema = new Schema(
   },
   { _id: true }
 );
+
+const boardSchema = new Schema(
+  {
+    name: { type: String, required: true, trim: true, maxlength: 100 },
+    description: { type: String, trim: true, maxlength: 300, default: "" },
+    columns: {
+      type: [columnSchema],
+      default: () => [
+        { title: "To Do", position: 0 },
+        { title: "Doing", position: 1 },
+        { title: "Done", position: 2 },
+      ],
+    },
+  },
+  { timestamps: true }
+);
