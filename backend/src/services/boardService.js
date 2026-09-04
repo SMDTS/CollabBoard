@@ -1,4 +1,5 @@
 import * as boardRepository from "../repositories/boardRepository.js";
+import * as taskRepository from "../repositories/taskRepository.js";
 import { NotFoundError } from "../utils/AppError.js";
 
 export async function getAllBoards() {
@@ -9,6 +10,12 @@ export async function getBoardById(id) {
   const board = await boardRepository.findById(id);
   if (!board) throw new NotFoundError("Board");
   return board;
+}
+
+export async function getBoardStats(id) {
+  const board = await boardRepository.findById(id);
+  if (!board) throw new NotFoundError("Board");
+  return taskRepository.getStatsByBoardId(board._id);
 }
 
 export async function createBoard(data) {

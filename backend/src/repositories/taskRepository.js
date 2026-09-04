@@ -6,6 +6,53 @@ export async function findAll() {
   return Task.find().sort({ createdAt: 1 });
 }
 
+export async function getStatsByBoardId(boardId) {
+  const now = new Date();
+  const currentYear = now.getUTCFullYear();
+  const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+
+  return Task.aggregate([
+    { $match: { boardId } },
+    {
+      $set: {
+        parsedDueDate: {
+          $dateFromString: {
+            dateString: { $concat: ["$dueDate", ` ${currentYear}`] },
+            format: "%b %d %Y",
+            onError: null,
+            onNull: null,
+            timezone: "UTC",
+          },
+        },
+      },
+    },
+    {
+      $group: {
+        _id: "$assignee",
+        taskCount: { $sum: 1 },
+        overdueCount: {
+          $sum: {
+            $cond: [
+              { $and: [{ $ne: ["$parsedDueDate", null] }, { $lt: ["$parsedDueDate", today] }] },
+              1,
+              0,
+            ],
+          },
+        },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        assignee: "$_id",
+        taskCount: 1,
+        overdueCount: 1,
+      },
+    },
+    { $sort: { assignee: 1 } },
+  ]);
+}
+
 export async function findById(id) {
   try {
     return await Task.findById(id);

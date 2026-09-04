@@ -11,6 +11,11 @@ export const getBoard = catchAsync(async (req, res) => {
   res.json(board);
 });
 
+export const getBoardStats = catchAsync(async (req, res) => {
+  const stats = await boardService.getBoardStats(req.params.id);
+  res.json(stats);
+});
+
 export const createBoard = catchAsync(async (req, res) => {
   const board = await boardService.createBoard(req.body);
   res.status(201).json(board);
