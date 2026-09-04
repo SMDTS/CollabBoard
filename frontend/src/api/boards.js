@@ -9,6 +9,10 @@ export function fetchBoard(id) {
   return apiFetch(`/api/boards/${id}`);
 }
 
+export function fetchBoardStats(id) {
+  return apiFetch(`/api/boards/${id}/stats`);
+}
+
 export function createBoard({ name, description }) {
   return apiFetch("/api/boards", {
     method: "POST",

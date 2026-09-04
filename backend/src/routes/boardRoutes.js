@@ -10,6 +10,7 @@ const router = Router();
 router.use(authenticate); // every route below requires a valid token
 
 router.get("/", boardController.listBoards);
+router.get("/:id/stats", boardController.getBoardStats);
 router.get("/:id", boardController.getBoard);
 router.post("/", validate(createBoardSchema), boardController.createBoard);
 router.patch("/:id", validate(updateBoardSchema), boardController.updateBoard);
