@@ -1,7 +1,9 @@
 // DashboardPage.jsx
 import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { useTasks } from "../context/TasksContext";
 import { useBoards } from "../context/BoardsContext";
+import { fetchActivity } from "../api/activity.js";
 import BubbleBackground from "../components/BubbleBackground";
 
 const STATUSES = ["To Do", "Doing", "Done"];
@@ -15,17 +17,33 @@ const STAT_ICONS = {
 
 const BOARD_ACCENTS = ["dash-accent--iris", "dash-accent--violet", "dash-accent--sky"];
 
-// TODO (M5 owner): replace with a real activity feed once Socket.io is wired up.
-const MOCK_ACTIVITY = [
-  { id: 1, text: "Sarah moved \"Build TaskCard component\" to Doing" },
-  { id: 2, text: "Jordan completed \"Install dependencies\"" },
-  { id: 3, text: "Priya added a new task to Product Launch" },
-  { id: 4, text: "Sarah created the Marketing Site board" },
-  { id: 5, text: "Jordan commented on \"Style board layout with flexbox\"" },
-  { id: 6, text: "Priya moved \"Write API spec for tasks endpoint\" to Doing" },
-  { id: 7, text: "Sarah updated the due date on \"Draft onboarding wireframes\"" },
-  { id: 8, text: "Jordan reassigned \"Confirm dev server runs\" to Priya" },
-];
+// One fetch on mount, same pattern as BoardsContext/TasksContext — kept
+// local to this page rather than a full context since Dashboard is the
+// only place the global activity feed is shown right now.
+function useActivity() {
+  const [activity, setActivity] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchActivity()
+      .then((data) => {
+        if (!cancelled) setActivity(data);
+      })
+      .catch((err) => {
+        if (!cancelled) setError(err.message);
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  return { activity, isLoading, error };
+}
 
 function StatIcon({ name }) {
   const common = { width: 18, height: 18, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round" };
@@ -63,6 +81,7 @@ function StatIcon({ name }) {
 function DashboardPage() {
   const { boards } = useBoards();
   const mockTasks = useTasks();
+  const { activity, isLoading: activityLoading, error: activityError } = useActivity();
   const total = mockTasks.length;
   const counts = STATUSES.reduce((acc, status) => {
     acc[status] = mockTasks.filter((t) => t.status === status).length;
@@ -123,14 +142,22 @@ function DashboardPage() {
         <section>
           <h2 className="dash-section__title">Recent activity</h2>
           <div className="dash-activity-wrap">
-            <ul className="dash-activity">
-              {MOCK_ACTIVITY.map((item, i) => (
-                <li key={item.id} className={`dash-activity__item ${BOARD_ACCENTS[i % BOARD_ACCENTS.length]}`}>
-                  <span className="dash-activity__dot" />
-                  {item.text}
-                </li>
-              ))}
-            </ul>
+            {activityLoading ? (
+              <p className="dash-activity__empty">Loading activity…</p>
+            ) : activityError ? (
+              <p className="dash-activity__empty">Couldn't load activity: {activityError}</p>
+            ) : activity.length === 0 ? (
+              <p className="dash-activity__empty">No activity yet — create or move a task to see it here.</p>
+            ) : (
+              <ul className="dash-activity">
+                {activity.map((item, i) => (
+                  <li key={item.id} className={`dash-activity__item ${BOARD_ACCENTS[i % BOARD_ACCENTS.length]}`}>
+                    <span className="dash-activity__dot" />
+                    {item.message}
+                  </li>
+                ))}
+              </ul>
+            )}
             <div className="dash-activity-fade" />
           </div>
         </section>
