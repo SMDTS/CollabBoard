@@ -1,6 +1,7 @@
 // src/services/taskService.js
 import * as taskRepository from "../repositories/taskRepository.js";
 import * as boardRepository from "../repositories/boardRepository.js";
+import * as activityService from "./activityService.js";
 import { NotFoundError } from "../utils/AppError.js";
 
 export function getAllTasks() {
@@ -20,12 +21,35 @@ export async function createTask(data) {
   if (!board) {
     throw new NotFoundError("Board");
   }
-  return taskRepository.create(data);
+
+  const task = taskRepository.create(data);
+
+  await activityService.logActivity({
+    action: "created",
+    actorId,
+    boardId: task.boardId,
+    taskId: task.id,
+    taskTitle: task.title,
+  });
+
+  return task;
 }
 
 export async function updateTask(id, patch) {
   const updated = await taskRepository.update(id, patch);
   if (!updated) throw new NotFoundError("Task");
+
+  if (patch.status && before && patch.status !== before.status) {
+    await activityService.logActivity({
+      action: "moved",
+      actorId,
+      boardId: updated.boardId,
+      taskId: updated.id,
+      taskTitle: updated.title,
+      details: { from: before.status, to: patch.status },
+    });
+  }
+
   return updated;
 }
 

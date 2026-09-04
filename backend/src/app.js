@@ -9,6 +9,7 @@ import taskRoutes from "./routes/taskRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import boardRoutes from "./routes/boardRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
+import activityRoutes from "./routes/activityRoutes.js";
 import { getDbState } from "./db/connect.js";
 
 const app = express();
@@ -26,6 +27,7 @@ app.use("/api/tasks", taskRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/boards", boardRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/activity", activityRoutes);
 
 app.use(notFoundHandler); // no route matched
 app.use(errorHandler); // LAST, always
