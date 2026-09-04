@@ -1,8 +1,9 @@
 // TeamPage.jsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useUsers } from "../context/UsersContext";
-import { useTasks } from "../context/TasksContext";
+import { useBoards } from "../context/BoardsContext";
 import { useToast } from "../context/ToastContext";
+import { fetchBoardStats } from "../api/boards.js";
 
 
 const ACCENTS = ["team-accent--violet", "team-accent--sky", "team-accent--green"];
@@ -15,7 +16,47 @@ function TeamPage() {
   const [query, setQuery] = useState("");
   const showToast = useToast();
   const { users, isLoading, error } = useUsers();
-  const tasks = useTasks();
+  const { boards, isLoading: boardsLoading } = useBoards();
+
+  // Per-assignee stats, merged across every board. The actual grouping
+  // and overdue check happens in MongoDB's aggregation pipeline
+  // (GET /api/boards/:id/stats) — this just sums each board's numbers
+  // together per assignee instead of filtering the raw task list here.
+  const [statsByAssignee, setStatsByAssignee] = useState({});
+  const [statsLoading, setStatsLoading] = useState(true);
+
+  useEffect(() => {
+    if (boardsLoading) return;
+    if (boards.length === 0) {
+      setStatsByAssignee({});
+      setStatsLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    setStatsLoading(true);
+
+    Promise.all(boards.map((b) => fetchBoardStats(b.id).catch(() => [])))
+      .then((allBoardStats) => {
+        if (cancelled) return;
+        const merged = {};
+        for (const boardStats of allBoardStats) {
+          for (const { assignee, taskCount, overdueCount } of boardStats) {
+            if (!merged[assignee]) merged[assignee] = { taskCount: 0, overdueCount: 0 };
+            merged[assignee].taskCount += taskCount;
+            merged[assignee].overdueCount += overdueCount;
+          }
+        }
+        setStatsByAssignee(merged);
+      })
+      .finally(() => {
+        if (!cancelled) setStatsLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [boards, boardsLoading]);
 
   const filtered = users.filter((u) => u.name.toLowerCase().includes(query.toLowerCase()));
 
@@ -43,10 +84,9 @@ function TeamPage() {
       {!isLoading && !error && (
         <div className="team-grid">
           {filtered.map((member, i) => {
-            const memberTasks = tasks.filter((t) => t.assignee === member.name);
-            const taskCount = memberTasks.length;
-            const doneCount = memberTasks.filter((t) => t.status === "Done").length;
-            const pct = taskCount ? Math.round((doneCount / taskCount) * 100) : 0;
+            const stats = statsByAssignee[member.name] ?? { taskCount: 0, overdueCount: 0 };
+            const { taskCount, overdueCount } = stats;
+            const onTrackPct = taskCount ? Math.round(((taskCount - overdueCount) / taskCount) * 100) : 100;
 
             return (
               <div className={`team-card ${ACCENTS[i % ACCENTS.length]}`} key={member.id}>
@@ -60,9 +100,11 @@ function TeamPage() {
 
                 <div className="team-card__progress">
                   <div className="team-card__progress-track">
-                    <div className="team-card__progress-fill" style={{ width: `${pct}%` }} />
+                    <div className="team-card__progress-fill" style={{ width: `${onTrackPct}%` }} />
                   </div>
-                  <span className="team-card__progress-label">{pct}% complete</span>
+                  <span className="team-card__progress-label">
+                    {statsLoading ? "Loading…" : `${onTrackPct}% on track`}
+                  </span>
                 </div>
 
                 <div className="team-card__stats">
@@ -70,7 +112,7 @@ function TeamPage() {
                     <strong>{taskCount}</strong> tasks
                   </span>
                   <span className="team-card__stat">
-                    <strong>{doneCount}</strong> done
+                    <strong>{overdueCount}</strong> overdue
                   </span>
                 </div>
               </div>
