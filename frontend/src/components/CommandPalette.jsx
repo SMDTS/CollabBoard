@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTasks } from "../context/TasksContext";
 import { useBoards } from "../context/BoardsContext";
+import { columnTitle } from "../utils/columns";
 
 const PAGES = [
   { label: "Boards", path: "/" },
@@ -78,15 +79,15 @@ function CommandPalette({ isOpen, onOpenChange }) {
             <div className="cmdk__group">
               <div className="cmdk__group-label">Tasks</div>
               {matchedTasks.map((t) => (
-                // TODO: once boards have real distinct data, deep-link to
-                // the exact board this task lives on instead of the first one.
                 <button
                   key={t.id}
                   className="cmdk__item"
-                  onClick={() => boards[0] && go(`/boards/${boards[0].id}`)}
+                  onClick={() => go(`/boards/${t.boardId}`)}
                 >
                   {t.title}
-                  <span className="cmdk__item-meta">{t.status}</span>
+                  <span className="cmdk__item-meta">
+                    {columnTitle(boards.find((b) => b.id === t.boardId), t.columnId)}
+                  </span>
                 </button>
               ))}
             </div>

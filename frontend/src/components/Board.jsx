@@ -1,28 +1,30 @@
 // Board.jsx
 import { useTasks } from "../context/TasksContext";
+import { getColumns } from "../utils/columns";
 import Column from "./Column";
 import TaskCard from "./TaskCard";
 
-const STATUSES = ["To Do", "Doing", "Done"];
-
-function Board({ boardId, onOpenTask }) {
+function Board({ board, onOpenTask }) {
   const tasks = useTasks();
+  const columns = getColumns(board);
 
   return (
     <div className="board">
-      {STATUSES.map((status) => {
-        const tasksForStatus = tasks.filter((task) => task.boardId === boardId && task.status === status);
+      {columns.map((column) => {
+        const tasksForColumn = tasks.filter(
+          (task) => task.boardId === board.id && task.columnId === column.id
+        );
 
         return (
-          <Column key={status} title={status} boardId={boardId}>
-            {tasksForStatus.map((task) => (
+          <Column key={column.id} columnId={column.id} title={column.title} boardId={board.id}>
+            {tasksForColumn.map((task) => (
               <TaskCard
                 key={task.id}
                 id={task.id}
                 title={task.title}
                 assignee={task.assignee}
                 dueDate={task.dueDate}
-                status={task.status}
+                columnTitle={column.title}
                 onOpen={onOpenTask}
               />
             ))}

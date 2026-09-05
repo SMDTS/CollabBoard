@@ -4,6 +4,7 @@ import { Routes, Route, useLocation, Navigate } from "react-router-dom";
 import Sidebar from "./components/Sidebar";
 import TopBar from "./components/TopBar";
 import CommandPalette from "./components/CommandPalette";
+import { TaskConflictBanner } from "./components/TaskConflictBanner";
 import { useAuth } from "./context/AuthContext";
 import { TasksProvider } from "./context/TasksContext";
 import { BoardsProvider } from "./context/BoardsContext";
@@ -68,6 +69,7 @@ function App() {
               </div>
             </div>
             <CommandPalette isOpen={isSearchOpen} onOpenChange={setIsSearchOpen} />
+            <TaskConflictBanner />
           </div>
         </UsersProvider>
       </TasksProvider>
