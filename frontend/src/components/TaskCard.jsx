@@ -11,8 +11,8 @@ function initials(name) {
   return name.slice(0, 2).toUpperCase();
 }
 
-function TaskCard({ id, title, assignee, dueDate, status, onOpen }) {
-  const accent = STATUS_ACCENT[status] || "var(--cb-text-muted)";
+function TaskCard({ id, title, assignee, dueDate, columnTitle, onOpen }) {
+  const accent = STATUS_ACCENT[columnTitle] || "var(--cb-text-muted)";
 
   function handleDragStart(e) {
     e.dataTransfer.setData("text/task-id", String(id));

@@ -1,7 +1,7 @@
 import { useTasks, useTasksActions } from "../context/TasksContext";
+import { useBoards } from "../context/BoardsContext";
 import { useToast } from "../context/ToastContext";
-
-const STATUSES = ["To Do", "Doing", "Done"];
+import { getColumns } from "../utils/columns";
 
 function initials(name) {
   return name.slice(0, 2).toUpperCase();
@@ -9,11 +9,15 @@ function initials(name) {
 
 function TaskDetailPanel({ taskId, onClose }) {
   const tasks = useTasks();
+  const { boards } = useBoards();
   const { updateTask, deleteTask, moveTask } = useTasksActions();
   const showToast = useToast();
 
   const task = tasks.find((t) => t.id === taskId);
   if (!task) return null;
+
+  const board = boards.find((b) => b.id === task.boardId);
+  const columns = getColumns(board);
 
   function handleDelete() {
     deleteTask(task.id);
@@ -21,8 +25,8 @@ function TaskDetailPanel({ taskId, onClose }) {
     onClose();
   }
 
-  function handleStatusChange(newStatus) {
-    moveTask(task.id, newStatus);
+  function handleColumnChange(newColumnId) {
+    moveTask(task.id, newColumnId);
   }
 
   return (
@@ -48,13 +52,13 @@ function TaskDetailPanel({ taskId, onClose }) {
         <div className="task-panel__field">
           <span className="task-panel__label">Status</span>
           <div className="task-panel__status-group">
-            {STATUSES.map((s) => (
+            {columns.map((c) => (
               <button
-                key={s}
-                className={`task-panel__status-btn ${task.status === s ? "task-panel__status-btn--active" : ""}`}
-                onClick={() => handleStatusChange(s)}
+                key={c.id}
+                className={`task-panel__status-btn ${task.columnId === c.id ? "task-panel__status-btn--active" : ""}`}
+                onClick={() => handleColumnChange(c.id)}
               >
-                {s}
+                {c.title}
               </button>
             ))}
           </div>

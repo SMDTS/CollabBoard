@@ -6,6 +6,8 @@ import { useBoards } from "../context/BoardsContext";
 import { fetchActivity } from "../api/activity.js";
 import BubbleBackground from "../components/BubbleBackground";
 
+import { columnTitle } from "../utils/columns";
+
 const STATUSES = ["To Do", "Doing", "Done"];
 
 const STAT_ICONS = {
@@ -80,11 +82,14 @@ function StatIcon({ name }) {
 
 function DashboardPage() {
   const { boards } = useBoards();
-  const mockTasks = useTasks();
+  const tasks = useTasks();
   const { activity, isLoading: activityLoading, error: activityError } = useActivity();
-  const total = mockTasks.length;
+  const total = tasks.length;
   const counts = STATUSES.reduce((acc, status) => {
-    acc[status] = mockTasks.filter((t) => t.status === status).length;
+    acc[status] = tasks.filter((t) => {
+      const board = boards.find((b) => b.id === t.boardId);
+      return columnTitle(board, t.columnId) === status;
+    }).length;
     return acc;
   }, {});
 

@@ -5,10 +5,10 @@ export function fetchTasks() {
   return apiFetch("/api/tasks");
 }
 
-export function createTask({ title, assignee, status, dueDate, boardId }) {
+export function createTask({ title, assignee, columnId, dueDate, boardId }) {
   return apiFetch("/api/tasks", {
     method: "POST",
-    body: JSON.stringify({ title, assignee, status, dueDate, boardId }),
+    body: JSON.stringify({ title, assignee, columnId, dueDate, boardId }),
   });
 }
 
@@ -24,5 +24,5 @@ export function deleteTask(id) {
 }
 
 export function fetchTask(id) {
-  return apiFetch(`/tasks/${id}`);
+  return apiFetch(`/api/tasks/${id}`);
 }

@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useBoards } from "../context/BoardsContext";
 import { useTasks } from "../context/TasksContext";
+import { getColumns } from "../utils/columns";
 import Board from "../components/Board";
 import TaskDetailPanel from "../components/TaskDetailPanel";
 import { avatarColor } from "../utils/avatarColor";
@@ -19,7 +20,11 @@ function initials(name) {
 function BoardPage() {
   const { boardId } = useParams();
   const { boards, isLoading } = useBoards();
-  const board = boards.find((b) => b.id === Number(boardId));
+  // boardId is a Mongo ObjectId string (e.g. "507f1f77bcf86cd799439011"),
+  // not a number — Number(boardId) here used to be NaN for every real
+  // board, which meant no board could ever be found once boards moved
+  // off the old in-memory integer ids.
+  const board = boards.find((b) => b.id === boardId);
   const tasks = useTasks();
   const [selectedTaskId, setSelectedTaskId] = useState(null);
 
@@ -43,8 +48,12 @@ function BoardPage() {
     );
   }
 
-  const boardTasks = tasks.filter((t) => t.boardId === Number(boardId));
-  const doneCount = boardTasks.filter((t) => t.status === "Done").length;
+  const boardTasks = tasks.filter((t) => t.boardId === boardId);
+  // "Done" isn't a field on the task anymore — it's whichever embedded
+  // column on this board is titled "Done" (the default seed data always
+  // has one; a board with custom column names may not).
+  const doneColumn = getColumns(board).find((c) => c.title === "Done");
+  const doneCount = doneColumn ? boardTasks.filter((t) => t.columnId === doneColumn.id).length : 0;
   const totalCount = boardTasks.length;
   const pct = totalCount ? Math.round((doneCount / totalCount) * 100) : 0;
   const assignees = [...new Set(boardTasks.map((t) => t.assignee))];
@@ -85,7 +94,7 @@ function BoardPage() {
         </div>
       </div>
 
-      <Board boardId={Number(boardId)} onOpenTask={setSelectedTaskId} />
+      <Board board={board} onOpenTask={setSelectedTaskId} />
 
       {selectedTaskId && <TaskDetailPanel taskId={selectedTaskId} onClose={() => setSelectedTaskId(null)} />}
     </div>

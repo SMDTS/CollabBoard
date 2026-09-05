@@ -1,11 +1,11 @@
 
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { useTasks, useTasksActions } from "../context/TasksContext";
+import { useBoards } from "../context/BoardsContext";
 import { useToast } from "../context/ToastContext";
 import { useUsers } from "../context/UsersContext";
 import { avatarColor } from "../utils/avatarColor";
-
-const STATUSES = ["To Do", "Doing", "Done"];
+import { getColumns } from "../utils/columns";
 
 const STATUS_ACCENT = {
   "To Do": "var(--cb-violet)",
@@ -21,6 +21,7 @@ function TaskDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const tasks = useTasks();
+  const { boards } = useBoards();
   const { users } = useUsers();
   const { updateTask, deleteTask, moveTask } = useTasksActions();
   const showToast = useToast();
@@ -39,6 +40,10 @@ function TaskDetailPage() {
     );
   }
 
+  const board = boards.find((b) => b.id === task.boardId);
+  const columns = getColumns(board);
+  const currentColumn = columns.find((c) => c.id === task.columnId);
+
   function handleDelete() {
     deleteTask(task.id);
     showToast(`Deleted "${task.title}"`, "success");
@@ -55,7 +60,7 @@ function TaskDetailPage() {
 
         <div className="task-detail">
         <div className="task-detail__header">
-          <span className="task-detail__status-dot" style={{ background: STATUS_ACCENT[task.status] }} />
+          <span className="task-detail__status-dot" style={{ background: STATUS_ACCENT[currentColumn?.title] || "var(--cb-text-muted)" }} />
           <input
             className="task-detail__title"
             value={task.title}
@@ -68,13 +73,13 @@ function TaskDetailPage() {
           <div className="task-detail__field">
             <span className="task-detail__label">Status</span>
             <div className="task-detail__status-group">
-              {STATUSES.map((s) => (
+              {columns.map((c) => (
                 <button
-                  key={s}
-                  className={`task-detail__status-btn ${task.status === s ? "task-detail__status-btn--active" : ""}`}
-                  onClick={() => moveTask(task.id, s)}
+                  key={c.id}
+                  className={`task-detail__status-btn ${task.columnId === c.id ? "task-detail__status-btn--active" : ""}`}
+                  onClick={() => moveTask(task.id, c.id)}
                 >
-                  {s}
+                  {c.title}
                 </button>
               ))}
             </div>

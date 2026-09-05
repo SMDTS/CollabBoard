@@ -83,10 +83,10 @@ export function TasksProvider({ children }) {
       .catch((err) => console.error("Immediate sync failed:", err));
   };
 
-  const addTask = async (status, title, boardId, assignee = "Sarah") => {
+  const addTask = async (columnId, title, boardId, assignee = "Sarah") => {
     const trimmed = title.trim();
     if (!trimmed) return;
-    const task = { id: newLocalId(), title: trimmed, assignee, status, boardId };
+    const task = { id: newLocalId(), title: trimmed, assignee, columnId, boardId };
     try {
       await tasksDB.put(toDoc(task, { syncStatus: "pending", pendingOp: "create" }));
       trySync();
@@ -95,8 +95,8 @@ export function TasksProvider({ children }) {
     }
   };
 
-  const moveTask = async (taskId, newStatus) => {
-    await patchLocalTask(taskId, { status: newStatus }, showToast, "Couldn't move the task");
+  const moveTask = async (taskId, newColumnId) => {
+    await patchLocalTask(taskId, { columnId: newColumnId }, showToast, "Couldn't move the task");
     trySync();
   };
 

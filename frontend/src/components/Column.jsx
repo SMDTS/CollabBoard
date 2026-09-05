@@ -8,11 +8,13 @@ const STATUS_THEME = {
   Done: { accent: "var(--cb-success)", tint: "var(--cb-done-tint)" },
 };
 
-function Column({ title, children, boardId }) {
+function Column({ title, children, boardId, columnId }) {
   const { moveTask, addTask } = useTasksActions();
   const [isDragOver, setIsDragOver] = useState(false);
   const [draft, setDraft] = useState("");
   const [isAdding, setIsAdding] = useState(false);
+  // Columns are per-board now (not a fixed global set), so a custom column
+  // title just falls back to a neutral theme instead of matching nothing.
   const theme = STATUS_THEME[title] || { accent: "var(--cb-violet)", tint: "var(--cb-surface-sunken)" };
   const isEmpty = children.length === 0;
 
@@ -28,19 +30,21 @@ function Column({ title, children, boardId }) {
   function handleDrop(e) {
     e.preventDefault();
     setIsDragOver(false);
-    const taskId = Number(e.dataTransfer.getData("text/task-id"));
-    if (taskId) moveTask(taskId, title);
+    // Task ids are Mongo ObjectId strings (or "local-<uuid>" while
+    // offline), not numbers — don't coerce them.
+    const taskId = e.dataTransfer.getData("text/task-id");
+    if (taskId) moveTask(taskId, columnId);
   }
 
   function handleEnter() {
     if (!draft.trim()) return;
-    addTask(title, draft, boardId);
+    addTask(columnId, draft, boardId);
     setDraft("");
     // Stays open so typing several cards in a row doesn't need re-clicking.
   }
 
   function handleBlur() {
-    if (draft.trim()) addTask(title, draft, boardId);
+    if (draft.trim()) addTask(columnId, draft, boardId);
     setDraft("");
     setIsAdding(false);
   }
