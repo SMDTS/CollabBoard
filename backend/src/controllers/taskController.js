@@ -3,7 +3,7 @@ import * as taskService from "../services/taskService.js";
 import { catchAsync } from "../utils/catchAsync.js";
 
 export const listTasks = catchAsync(async (req, res) => {
-  const tasks = await taskService.getAllTasks();
+  const tasks = await taskService.getAllTasks(req.user.id);
   res.json(tasks);
 });
 

@@ -1,12 +1,14 @@
 // BoardPage.jsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useBoards } from "../context/BoardsContext";
 import { useTasks } from "../context/TasksContext";
+import { useAuth } from "../context/AuthContext";
 import { getColumns } from "../utils/columns";
 import Board from "../components/Board";
 import TaskDetailPanel from "../components/TaskDetailPanel";
 import { avatarColor } from "../utils/avatarColor";
+import { fetchBoardMembers } from "../api/boards.js";
 
 function initials(name) {
   return name
@@ -26,7 +28,26 @@ function BoardPage() {
   // off the old in-memory integer ids.
   const board = boards.find((b) => b.id === boardId);
   const tasks = useTasks();
+  const { user } = useAuth();
   const [selectedTaskId, setSelectedTaskId] = useState(null);
+  const [members, setMembers] = useState([]);
+
+  const isOwner = !!board && board.ownerId === user?.id;
+
+  useEffect(() => {
+    if (!board) return;
+    let cancelled = false;
+    fetchBoardMembers(board.id)
+      .then((m) => {
+        if (!cancelled) setMembers(m);
+      })
+      .catch(() => {
+        if (!cancelled) setMembers([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [board?.id]);
 
   if (isLoading) {
     return (
@@ -94,9 +115,23 @@ function BoardPage() {
         </div>
       </div>
 
-      <Board board={board} onOpenTask={setSelectedTaskId} />
+      <Board
+        board={board}
+        onOpenTask={setSelectedTaskId}
+        isOwner={isOwner}
+        currentUserId={user?.id}
+        members={members}
+      />
 
-      {selectedTaskId && <TaskDetailPanel taskId={selectedTaskId} onClose={() => setSelectedTaskId(null)} />}
+      {selectedTaskId && (
+        <TaskDetailPanel
+          taskId={selectedTaskId}
+          onClose={() => setSelectedTaskId(null)}
+          isOwner={isOwner}
+          currentUserId={user?.id}
+          members={members}
+        />
+      )}
     </div>
   );
 }

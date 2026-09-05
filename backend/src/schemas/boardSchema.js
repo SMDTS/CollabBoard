@@ -7,3 +7,7 @@ export const createBoardSchema = z.object({
 });
 
 export const updateBoardSchema = createBoardSchema.partial();
+
+export const inviteMemberSchema = z.object({
+  email: z.string().trim().min(1, "Email is required").email("Invalid email"),
+});

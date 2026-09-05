@@ -1,9 +1,19 @@
 // src/repositories/taskRepository.js
 import { Task } from "../models/Task.js";
+import { Board } from "../models/Board.js";
 import { ConflictError } from "../utils/AppError.js";
 
 export async function findAll() {
   return Task.find().sort({ createdAt: 1 });
+}
+
+// Only tasks on boards the user can actually see (owner or member) —
+// this is what the offline-sync pull uses, so a user's local PouchDB
+// never ends up holding tasks from boards they don't have access to.
+export async function findAllForUser(userId) {
+  const boards = await Board.find({ $or: [{ owner: userId }, { members: userId }] }, { _id: 1 });
+  const boardIds = boards.map((b) => b._id);
+  return Task.find({ boardId: { $in: boardIds } }).sort({ createdAt: 1 });
 }
 
 export async function getStatsByBoardId(boardId) {
@@ -51,8 +61,11 @@ export async function getStatsByBoardId(boardId) {
       },
     },
     {
+      // Group by assigneeId (a real user id) rather than the free-text
+      // assignee name — reliable even if two members share a display name.
       $group: {
-        _id: "$assignee",
+        _id: "$assigneeId",
+        assignee: { $first: "$assignee" },
         taskCount: { $sum: 1 },
         overdueCount: {
           $sum: {
@@ -68,7 +81,8 @@ export async function getStatsByBoardId(boardId) {
     {
       $project: {
         _id: 0,
-        assignee: "$_id",
+        assigneeId: { $toString: "$_id" },
+        assignee: 1,
         taskCount: 1,
         overdueCount: 1,
       },
@@ -86,8 +100,8 @@ export async function findById(id) {
   }
 }
 
-export async function create({ title, assignee, dueDate, description, boardId, columnId }) {
-  return Task.create({ title, assignee, dueDate, description, boardId, columnId });
+export async function create({ title, assignee, assigneeId, dueDate, description, boardId, columnId }) {
+  return Task.create({ title, assignee, assigneeId, dueDate, description, boardId, columnId });
 }
 
 // patch must include `version` — the version the client last saw.

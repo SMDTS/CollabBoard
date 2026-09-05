@@ -3,7 +3,12 @@ const { Schema } = mongoose;
 
 const taskSchema = new Schema({
   title: { type: String, required: true, trim: true, maxlength: 200 },
+  // `assignee` stays a display-name string (kept for backward compatibility
+  // with the stats aggregation and the existing UI, which key off names).
+  // `assigneeId` is the real, reliable link to a User — that's what
+  // permission checks (e.g. "can this user move this task?") use.
   assignee: { type: String },
+  assigneeId: { type: Schema.Types.ObjectId, ref: "User", index: true },
   // Stored as free text (e.g. "Aug 12", "No date"), not a real Date —
   // this matches how the frontend reads/writes it (plain text input).
   dueDate: { type: String },
@@ -19,6 +24,7 @@ function transform(doc, ret) {
   ret.id = ret._id.toString();
   delete ret._id;
   delete ret.__v;
+  if (ret.assigneeId) ret.assigneeId = ret.assigneeId.toString();
   return ret;
 }
 taskSchema.set("toJSON", { transform });

@@ -1,7 +1,9 @@
 import { Board } from "../models/Board.js";
 
-export async function findAll() {
-  return Board.find().sort({ createdAt: 1 });
+// Only boards where the user is the owner or an invited member — this is
+// the access-control boundary for "which boards can this user even see".
+export async function findAllForUser(userId) {
+  return Board.find({ $or: [{ owner: userId }, { members: userId }] }).sort({ createdAt: 1 });
 }
 
 export async function findById(id) {
@@ -13,8 +15,8 @@ export async function findById(id) {
   }
 }
 
-export async function create({ name, description }) {
-  return Board.create({ name, description });
+export async function create({ name, description, ownerId }) {
+  return Board.create({ name, description, owner: ownerId, members: [] });
 }
 
 export async function update(id, patch) {
@@ -37,4 +39,14 @@ export async function remove(id) {
     if (err.name === "CastError") return false;
     throw err;
   }
+}
+
+// $addToSet: adding an existing member again is a no-op at the DB level;
+// the service layer checks first so it can tell the caller "already a member".
+export async function addMember(boardId, userId) {
+  return Board.findByIdAndUpdate(boardId, { $addToSet: { members: userId } }, { new: true });
+}
+
+export async function removeMember(boardId, userId) {
+  return Board.findByIdAndUpdate(boardId, { $pull: { members: userId } }, { new: true });
 }
