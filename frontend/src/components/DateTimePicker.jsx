@@ -86,12 +86,7 @@ function DateTimePicker({ value, onChange, placeholder = "Pick a due date & time
     if (parsed.date) setViewMonth(parsed.date);
   }, [value]);
 
-  // The popover is rendered via a portal (see below) so it can't get
-  // clipped by the modal's scrollable body — position it "manually"
-  // against the trigger button's on-screen position instead of relying
-  // on normal document flow. Flips above the trigger (and caps its own
-  // height with internal scrolling) whenever there isn't enough room
-  // below, so it always stays fully on-screen and reachable.
+
   useLayoutEffect(() => {
     if (!isOpen) return;
     function place() {

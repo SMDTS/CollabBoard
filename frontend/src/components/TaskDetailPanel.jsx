@@ -19,8 +19,6 @@ function TaskDetailPanel({ taskId, onClose, isOwner, currentUserId, members = []
   const board = boards.find((b) => b.id === task.boardId);
   const columns = getColumns(board);
 
-  // The assignee may move the card between columns; only the owner may
-  // edit anything else (title, due date, who it's assigned to) or delete it.
   const isAssignee = task.assigneeId === currentUserId;
   const canMove = isOwner || isAssignee;
   const canEdit = isOwner;

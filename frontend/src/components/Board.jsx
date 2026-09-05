@@ -9,10 +9,7 @@ import CreateTaskModal from "./CreateTaskModal";
 function Board({ board, onOpenTask, isOwner, currentUserId, members }) {
   const tasks = useTasks();
   const columns = getColumns(board);
-  // Which column's "+" was clicked — also doubles as the modal's open
-  // state (null/"" means closed). Lives here, not in Column, so the
-  // modal can offer every column as a "Status" choice, not just the one
-  // it was opened from.
+
   const [addTaskColumnId, setAddTaskColumnId] = useState(null);
 
   return (

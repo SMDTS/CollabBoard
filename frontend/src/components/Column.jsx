@@ -11,8 +11,7 @@ const STATUS_THEME = {
 function Column({ title, children, columnId, isOwner, onAddTask }) {
   const { moveTask } = useTasksActions();
   const [isDragOver, setIsDragOver] = useState(false);
-  // Columns are per-board now (not a fixed global set), so a custom column
-  // title just falls back to a neutral theme instead of matching nothing.
+
   const theme = STATUS_THEME[title] || { accent: "var(--cb-violet)", tint: "var(--cb-surface-sunken)" };
   const isEmpty = children.length === 0;
 
@@ -28,8 +27,7 @@ function Column({ title, children, columnId, isOwner, onAddTask }) {
   function handleDrop(e) {
     e.preventDefault();
     setIsDragOver(false);
-    // Task ids are Mongo ObjectId strings (or "local-<uuid>" while
-    // offline), not numbers — don't coerce them.
+
     const taskId = e.dataTransfer.getData("text/task-id");
     if (taskId) moveTask(taskId, columnId);
   }

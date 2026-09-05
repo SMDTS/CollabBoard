@@ -16,8 +16,7 @@ function CreateTaskModal({ isOpen, onClose, boardId, columns = [], members = [],
   const [isSubmitting, setIsSubmitting] = useState(false);
   const titleRef = useRef(null);
 
-  // Re-seed the form fresh every time the modal is opened, defaulting the
-  // status to whichever column's "+" button was clicked.
+
   useEffect(() => {
     if (!isOpen) return;
     setTitle("");
