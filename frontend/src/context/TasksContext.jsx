@@ -83,10 +83,32 @@ export function TasksProvider({ children }) {
       .catch((err) => console.error("Immediate sync failed:", err));
   };
 
-  const addTask = async (columnId, title, boardId, assignee = "Sarah") => {
+  // assigneeId is required — only a board owner can create tasks, and every
+  // task must be assigned to a real board member. assigneeName is just for
+  // instant local display before the create round-trips to the server.
+  // Takes an options object (rather than a long positional list) since the
+  // create-task modal fills in several optional fields at once.
+  const addTask = async ({
+    columnId,
+    title,
+    boardId,
+    assigneeId,
+    assigneeName = "",
+    dueDate = "",
+    description = "",
+  }) => {
     const trimmed = title.trim();
-    if (!trimmed) return;
-    const task = { id: newLocalId(), title: trimmed, assignee, columnId, boardId };
+    if (!trimmed || !assigneeId) return;
+    const task = {
+      id: newLocalId(),
+      title: trimmed,
+      description,
+      assigneeId,
+      assignee: assigneeName,
+      dueDate: dueDate || "No date",
+      columnId,
+      boardId,
+    };
     try {
       await tasksDB.put(toDoc(task, { syncStatus: "pending", pendingOp: "create" }));
       trySync();

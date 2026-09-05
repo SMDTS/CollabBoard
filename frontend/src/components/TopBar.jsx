@@ -3,9 +3,8 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
-
-// TODO (M5 owner): replace with a real notification count once Socket.io/activity exists.
-const NOTIFICATION_COUNT = 3;
+import { useInvitations, useInvitationsActions } from "../context/InvitationsContext";
+import { useToast } from "../context/ToastContext";
 
 function initials(name) {
   return (name || "?").slice(0, 2).toUpperCase();
@@ -21,14 +20,34 @@ function TopBar({ onOpenSearch }) {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
   const { user, logout } = useAuth();
+  const { invitations } = useInvitations();
+  const { respond } = useInvitationsActions();
+  const showToast = useToast();
   const [now, setNow] = useState(new Date());
   const [menuOpen, setMenuOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [respondingId, setRespondingId] = useState(null);
   const isMac = typeof navigator !== "undefined" && /Mac/.test(navigator.platform);
 
   function handleLogout() {
     setMenuOpen(false);
     logout();
     navigate("/login");
+  }
+
+  async function handleRespond(id, action, boardName) {
+    setRespondingId(id);
+    try {
+      await respond(id, action);
+      showToast(
+        action === "accept" ? `Joined "${boardName}"` : `Declined invite to "${boardName}"`,
+        "success"
+      );
+    } catch (err) {
+      showToast(err.message || "Couldn't respond to that invite", "error");
+    } finally {
+      setRespondingId(null);
+    }
   }
 
   useEffect(() => {
@@ -68,13 +87,52 @@ function TopBar({ onOpenSearch }) {
           )}
         </button>
 
-        <button className="topbar__icon-btn" aria-label="Notifications">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
-            <path d="M13.73 21a2 2 0 01-3.46 0" />
-          </svg>
-          {NOTIFICATION_COUNT > 0 && <span className="topbar__badge">{NOTIFICATION_COUNT}</span>}
-        </button>
+        <div className="topbar__notif">
+          <button
+            className="topbar__icon-btn"
+            aria-label="Notifications"
+            onClick={() => setNotifOpen((prev) => !prev)}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
+              <path d="M13.73 21a2 2 0 01-3.46 0" />
+            </svg>
+            {invitations.length > 0 && <span className="topbar__badge">{invitations.length}</span>}
+          </button>
+
+          {notifOpen && (
+            <div className="topbar__notif-menu" onMouseLeave={() => setNotifOpen(false)}>
+              <div className="topbar__notif-title">Board invitations</div>
+              {invitations.length === 0 ? (
+                <div className="topbar__notif-empty">No pending invitations.</div>
+              ) : (
+                invitations.map((inv) => (
+                  <div className="topbar__notif-item" key={inv.id}>
+                    <div className="topbar__notif-text">
+                      <strong>{inv.invitedByName}</strong> invited you to <strong>{inv.boardName}</strong>
+                    </div>
+                    <div className="topbar__notif-actions">
+                      <button
+                        className="topbar__notif-btn topbar__notif-btn--accept"
+                        disabled={respondingId === inv.id}
+                        onClick={() => handleRespond(inv.id, "accept", inv.boardName)}
+                      >
+                        Accept
+                      </button>
+                      <button
+                        className="topbar__notif-btn"
+                        disabled={respondingId === inv.id}
+                        onClick={() => handleRespond(inv.id, "decline", inv.boardName)}
+                      >
+                        Decline
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+        </div>
 
         <div className="topbar__profile">
           <button className="topbar__avatar" onClick={() => setMenuOpen((prev) => !prev)} aria-label="Profile menu">

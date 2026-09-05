@@ -22,6 +22,13 @@ const boardSchema = new Schema(
         { title: "Done", position: 2 },
       ],
     },
+    // The board owner: the only user who can invite/kick members, create
+    // and assign tasks, and edit/delete the board itself.
+    owner: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
+    // Everyone else with access to this board. Deliberately does NOT
+    // include the owner — "does this user have access" is always
+    // `isOwner || members.includes(userId)`.
+    members: { type: [{ type: Schema.Types.ObjectId, ref: "User" }], default: [] },
   },
   { timestamps: true }
 );
@@ -36,6 +43,10 @@ function transform(doc, ret) {
       return { id: _id?.toString?.() ?? _id, ...rest };
     });
   }
+  ret.ownerId = ret.owner?.toString?.() ?? ret.owner;
+  delete ret.owner;
+  ret.memberIds = Array.isArray(ret.members) ? ret.members.map((m) => m.toString?.() ?? m) : [];
+  delete ret.members;
   return ret;
 }
 

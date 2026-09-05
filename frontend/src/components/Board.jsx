@@ -1,12 +1,19 @@
 // Board.jsx
+import { useState } from "react";
 import { useTasks } from "../context/TasksContext";
 import { getColumns } from "../utils/columns";
 import Column from "./Column";
 import TaskCard from "./TaskCard";
+import CreateTaskModal from "./CreateTaskModal";
 
-function Board({ board, onOpenTask }) {
+function Board({ board, onOpenTask, isOwner, currentUserId, members }) {
   const tasks = useTasks();
   const columns = getColumns(board);
+  // Which column's "+" was clicked — also doubles as the modal's open
+  // state (null/"" means closed). Lives here, not in Column, so the
+  // modal can offer every column as a "Status" choice, not just the one
+  // it was opened from.
+  const [addTaskColumnId, setAddTaskColumnId] = useState(null);
 
   return (
     <div className="board">
@@ -16,7 +23,14 @@ function Board({ board, onOpenTask }) {
         );
 
         return (
-          <Column key={column.id} columnId={column.id} title={column.title} boardId={board.id}>
+          <Column
+            key={column.id}
+            columnId={column.id}
+            title={column.title}
+            boardId={board.id}
+            isOwner={isOwner}
+            onAddTask={() => setAddTaskColumnId(column.id)}
+          >
             {tasksForColumn.map((task) => (
               <TaskCard
                 key={task.id}
@@ -26,11 +40,23 @@ function Board({ board, onOpenTask }) {
                 dueDate={task.dueDate}
                 columnTitle={column.title}
                 onOpen={onOpenTask}
+                // Only the board owner, or the person this card is
+                // assigned to, may drag it between columns.
+                canDrag={isOwner || task.assigneeId === currentUserId}
               />
             ))}
           </Column>
         );
       })}
+
+      <CreateTaskModal
+        isOpen={!!addTaskColumnId}
+        onClose={() => setAddTaskColumnId(null)}
+        boardId={board.id}
+        columns={columns}
+        members={members}
+        defaultColumnId={addTaskColumnId}
+      />
     </div>
   );
 }

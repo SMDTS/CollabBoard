@@ -4,10 +4,10 @@ import { useToast } from "../context/ToastContext";
 import { getColumns } from "../utils/columns";
 
 function initials(name) {
-  return name.slice(0, 2).toUpperCase();
+  return (name || "?").slice(0, 2).toUpperCase();
 }
 
-function TaskDetailPanel({ taskId, onClose }) {
+function TaskDetailPanel({ taskId, onClose, isOwner, currentUserId, members = [] }) {
   const tasks = useTasks();
   const { boards } = useBoards();
   const { updateTask, deleteTask, moveTask } = useTasksActions();
@@ -19,14 +19,28 @@ function TaskDetailPanel({ taskId, onClose }) {
   const board = boards.find((b) => b.id === task.boardId);
   const columns = getColumns(board);
 
+  // The assignee may move the card between columns; only the owner may
+  // edit anything else (title, due date, who it's assigned to) or delete it.
+  const isAssignee = task.assigneeId === currentUserId;
+  const canMove = isOwner || isAssignee;
+  const canEdit = isOwner;
+
   function handleDelete() {
+    if (!canEdit) return;
     deleteTask(task.id);
     showToast(`Deleted "${task.title}"`, "success");
     onClose();
   }
 
   function handleColumnChange(newColumnId) {
+    if (!canMove) return;
     moveTask(task.id, newColumnId);
+  }
+
+  function handleAssigneeChange(memberId) {
+    if (!canEdit) return;
+    const name = members.find((m) => m.id === memberId)?.name || "";
+    updateTask(task.id, { assigneeId: memberId, assignee: name });
   }
 
   return (
@@ -46,7 +60,8 @@ function TaskDetailPanel({ taskId, onClose }) {
         <input
           className="task-panel__title"
           value={task.title}
-          onChange={(e) => updateTask(task.id, { title: e.target.value })}
+          disabled={!canEdit}
+          onChange={(e) => canEdit && updateTask(task.id, { title: e.target.value })}
         />
 
         <div className="task-panel__field">
@@ -55,6 +70,7 @@ function TaskDetailPanel({ taskId, onClose }) {
             {columns.map((c) => (
               <button
                 key={c.id}
+                disabled={!canMove}
                 className={`task-panel__status-btn ${task.columnId === c.id ? "task-panel__status-btn--active" : ""}`}
                 onClick={() => handleColumnChange(c.id)}
               >
@@ -62,14 +78,29 @@ function TaskDetailPanel({ taskId, onClose }) {
               </button>
             ))}
           </div>
+          {!canMove && <span className="task-panel__hint">Only the owner or assignee can move this card.</span>}
         </div>
 
         <div className="task-panel__field">
           <span className="task-panel__label">Assignee</span>
-          <div className="task-panel__assignee">
-            <div className="task-panel__avatar">{initials(task.assignee)}</div>
-            {task.assignee}
-          </div>
+          {canEdit ? (
+            <select
+              className="task-panel__input"
+              value={task.assigneeId || ""}
+              onChange={(e) => handleAssigneeChange(e.target.value)}
+            >
+              {members.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.name}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <div className="task-panel__assignee">
+              <div className="task-panel__avatar">{initials(task.assignee)}</div>
+              {task.assignee}
+            </div>
+          )}
         </div>
 
         <div className="task-panel__field">
@@ -77,13 +108,16 @@ function TaskDetailPanel({ taskId, onClose }) {
           <input
             className="task-panel__input"
             value={task.dueDate}
-            onChange={(e) => updateTask(task.id, { dueDate: e.target.value })}
+            disabled={!canEdit}
+            onChange={(e) => canEdit && updateTask(task.id, { dueDate: e.target.value })}
           />
         </div>
 
-        <button className="task-panel__delete" onClick={handleDelete}>
-          Delete task
-        </button>
+        {canEdit && (
+          <button className="task-panel__delete" onClick={handleDelete}>
+            Delete task
+          </button>
+        )}
       </div>
     </>
   );
