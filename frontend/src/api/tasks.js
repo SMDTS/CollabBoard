@@ -22,3 +22,7 @@ export function updateTask(id, patch) {
 export function deleteTask(id) {
   return apiFetch(`/api/tasks/${id}`, { method: "DELETE" });
 }
+
+export function fetchTask(id) {
+  return apiFetch(`/tasks/${id}`);
+}
