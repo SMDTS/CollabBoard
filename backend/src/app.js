@@ -9,6 +9,9 @@ import taskRoutes from "./routes/taskRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import boardRoutes from "./routes/boardRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
+import activityRoutes from "./routes/activityRoutes.js";
+import invitationRoutes from "./routes/invitationRoutes.js";
+import { getDbState } from "./db/connect.js";
 
 const app = express();
 
@@ -18,13 +21,15 @@ app.use(requestId);
 app.use(requestLogger);
 
 app.get("/api/health", (req, res) => {
-  res.json({ status: "ok", uptime: process.uptime() });
+  res.json({ status: "ok", uptime: process.uptime(), db: getDbState() });
 });
 
 app.use("/api/tasks", taskRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/boards", boardRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/activity", activityRoutes);
+app.use("/api/invitations", invitationRoutes);
 
 app.use(notFoundHandler); // no route matched
 app.use(errorHandler); // LAST, always

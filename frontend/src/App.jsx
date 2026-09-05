@@ -4,10 +4,12 @@ import { Routes, Route, useLocation, Navigate } from "react-router-dom";
 import Sidebar from "./components/Sidebar";
 import TopBar from "./components/TopBar";
 import CommandPalette from "./components/CommandPalette";
+import { TaskConflictBanner } from "./components/TaskConflictBanner";
 import { useAuth } from "./context/AuthContext";
 import { TasksProvider } from "./context/TasksContext";
 import { BoardsProvider } from "./context/BoardsContext";
 import { UsersProvider } from "./context/UsersContext";
+import { InvitationsProvider } from "./context/InvitationsContext";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import BoardsListPage from "./pages/BoardsListPage";
@@ -48,6 +50,7 @@ function App() {
 
   return (
     <BoardsProvider>
+      <InvitationsProvider>
       <TasksProvider>
         <UsersProvider>
           <div className="app">
@@ -68,9 +71,11 @@ function App() {
               </div>
             </div>
             <CommandPalette isOpen={isSearchOpen} onOpenChange={setIsSearchOpen} />
+            <TaskConflictBanner />
           </div>
         </UsersProvider>
       </TasksProvider>
+      </InvitationsProvider>
     </BoardsProvider>
   );
 }

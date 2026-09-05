@@ -1,25 +1,30 @@
+// src/controllers/taskController.js
 import * as taskService from "../services/taskService.js";
+import { catchAsync } from "../utils/catchAsync.js";
 
-export function listTasks(req, res) {
-  res.json(taskService.getAllTasks());
-}
+export const listTasks = catchAsync(async (req, res) => {
+  const tasks = await taskService.getAllTasks(req.user.id);
+  res.json(tasks);
+});
 
-export function getTask(req, res) {
-  const task = taskService.getTaskById(Number(req.params.id));
+export const getTask = catchAsync(async (req, res) => {
+  const task = await taskService.getTaskById(req.params.id);
   res.json(task);
-}
+});
 
-export function createTask(req, res) {
-  const task = taskService.createTask(req.body);
+export const createTask = catchAsync(async (req, res) => {
+  const task = await taskService.createTask(req.body, req.user.id);
   res.status(201).json(task);
-}
+});
 
-export function updateTask(req, res) {
-  const task = taskService.updateTask(Number(req.params.id), req.body);
+// req.body.version is validated as required by updateTaskSchema, so
+// it's always present here by the time this runs.
+export const updateTask = catchAsync(async (req, res) => {
+  const task = await taskService.updateTask(req.params.id, req.body, req.user.id);
   res.json(task);
-}
+});
 
-export function deleteTask(req, res) {
-  taskService.deleteTask(Number(req.params.id));
+export const deleteTask = catchAsync(async (req, res) => {
+  await taskService.deleteTask(req.params.id, req.user.id);
   res.status(204).end();
-}
+});

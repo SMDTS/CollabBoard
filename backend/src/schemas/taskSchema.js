@@ -1,16 +1,23 @@
 // src/schemas/taskSchema.js
 import { z } from "zod";
 
-const STATUSES = ["To Do", "Doing", "Done"];
+const objectId = z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid id");
 
 export const createTaskSchema = z.object({
   title: z.string().trim().min(1, "Title is required").max(200),
-  assignee: z.string().trim().min(1, "Assignee is required"),
-  status: z.enum(STATUSES).default("To Do"),
+  // The assignee is now picked from the board's members (a real user),
+  // not typed in as free text — the server resolves this id to a
+  // display name and stores both.
+  assigneeId: objectId,
   dueDate: z.string().trim().min(1).default("No date"),
   description: z.string().trim().max(2000).default(""),
-  boardId: z.number().int().positive("boardId is required"),
+  boardId: objectId,
+  columnId: objectId,
 });
 
-// All fields optional for PATCH — but if present, still validated.
-export const updateTaskSchema = createTaskSchema.partial();
+// All fields optional for PATCH, EXCEPT `version` — the client must
+// always say which version it last saw, so we can detect if someone
+// else edited the task first (optimistic concurrency).
+export const updateTaskSchema = createTaskSchema.partial().extend({
+  version: z.number().int().min(0, "version is required"),
+});

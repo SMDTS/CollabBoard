@@ -6,15 +6,17 @@
   "scripts": {
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
-    "lint": "eslint src"
+    "lint": "eslint src",
+    "seed:boards": "node src/scripts/seedBoards.js"
   },
   "dependencies": {
-    "express": "^4.19.2",
+    "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
-    "zod": "^3.23.8",
-    "bcryptjs": "^2.4.3",
-    "jsonwebtoken": "^9.0.2"
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.24.4",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "eslint": "^9.0.0"

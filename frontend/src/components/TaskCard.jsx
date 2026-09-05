@@ -8,26 +8,31 @@ const STATUS_ACCENT = {
 };
 
 function initials(name) {
-  return name.slice(0, 2).toUpperCase();
+  return (name || "?").slice(0, 2).toUpperCase();
 }
 
-function TaskCard({ id, title, assignee, dueDate, status, onOpen }) {
-  const accent = STATUS_ACCENT[status] || "var(--cb-text-muted)";
+function TaskCard({ id, title, assignee, dueDate, columnTitle, onOpen, canDrag = true }) {
+  const accent = STATUS_ACCENT[columnTitle] || "var(--cb-text-muted)";
 
   function handleDragStart(e) {
+    if (!canDrag) {
+      e.preventDefault();
+      return;
+    }
     e.dataTransfer.setData("text/task-id", String(id));
     e.dataTransfer.effectAllowed = "move";
   }
 
   return (
     <div
-      className="board-card"
-      draggable
+      className={`board-card ${!canDrag ? "board-card--locked" : ""}`}
+      draggable={canDrag}
       onDragStart={handleDragStart}
       onClick={() => onOpen?.(id)}
       role="button"
       tabIndex={0}
       onKeyDown={(e) => e.key === "Enter" && onOpen?.(id)}
+      title={canDrag ? undefined : "Only the board owner or the assigned member can move this card"}
     >
       <h3 className="board-card__title">{title}</h3>
       <div className="board-card__footer">

@@ -1,30 +1,52 @@
-// src/repositories/boardRepository.js
-import { boards, bumpBoardId } from "../data/boards.js";
+import { Board } from "../models/Board.js";
 
-export function findAll() {
-  return boards;
+// Only boards where the user is the owner or an invited member — this is
+// the access-control boundary for "which boards can this user even see".
+export async function findAllForUser(userId) {
+  return Board.find({ $or: [{ owner: userId }, { members: userId }] }).sort({ createdAt: 1 });
 }
 
-export function findById(id) {
-  return boards.find((b) => b.id === id);
+export async function findById(id) {
+  try {
+    return await Board.findById(id);
+  } catch (err) {
+    if (err.name === "CastError") return null;
+    throw err;
+  }
 }
 
-export function create({ name, description }) {
-  const board = { id: bumpBoardId(), name, description };
-  boards.push(board);
-  return board;
+export async function create({ name, description, ownerId }) {
+  return Board.create({ name, description, owner: ownerId, members: [] });
 }
 
-export function update(id, patch) {
-  const board = findById(id);
-  if (!board) return null;
-  Object.assign(board, patch);
-  return board;
+export async function update(id, patch) {
+  try {
+    return await Board.findByIdAndUpdate(id, patch, {
+      new: true,
+      runValidators: true,
+    });
+  } catch (err) {
+    if (err.name === "CastError") return null;
+    throw err;
+  }
 }
 
-export function remove(id) {
-  const index = boards.findIndex((b) => b.id === id);
-  if (index === -1) return false;
-  boards.splice(index, 1);
-  return true;
+export async function remove(id) {
+  try {
+    const deleted = await Board.findByIdAndDelete(id);
+    return Boolean(deleted);
+  } catch (err) {
+    if (err.name === "CastError") return false;
+    throw err;
+  }
+}
+
+// $addToSet: adding an existing member again is a no-op at the DB level;
+// the service layer checks first so it can tell the caller "already a member".
+export async function addMember(boardId, userId) {
+  return Board.findByIdAndUpdate(boardId, { $addToSet: { members: userId } }, { new: true });
+}
+
+export async function removeMember(boardId, userId) {
+  return Board.findByIdAndUpdate(boardId, { $pull: { members: userId } }, { new: true });
 }
