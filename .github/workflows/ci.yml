@@ -12,7 +12,9 @@ jobs:
       run:
         working-directory: backend
     env:
-      MONGOMS_DOWNLOAD_DIR: ${{ github.workspace }}/.cache/mongodb-binaries
+       MONGOMS_DOWNLOAD_DIR: ${{ github.workspace }}/.cache/mongodb-binaries
+       JWT_SECRET: test-jwt-secret-for-ci-only
+       MONGODB_URI: mongodb://localhost:27017/flowty-test
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
