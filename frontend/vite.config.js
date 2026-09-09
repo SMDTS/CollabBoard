@@ -3,13 +3,10 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-  define: {
-    global: 'globalThis',
+  test: {
+    environment: "jsdom",
+    globals: true,
+    setupFiles: "./src/setupTests.js",
+    include: ["src/**/*.test.{js,jsx}"],
   },
-  resolve: {
-    alias: {
-      events: 'events',
-      util: 'util',
-    },
-  },
-})
+});
