@@ -10,8 +10,11 @@ import { TasksProvider } from "./context/TasksContext";
 import { BoardsProvider } from "./context/BoardsContext";
 import { UsersProvider } from "./context/UsersContext";
 import { InvitationsProvider } from "./context/InvitationsContext";
+import { NotificationsProvider } from "./context/NotificationsContext";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 import BoardsListPage from "./pages/BoardsListPage";
 import BoardPage from "./pages/BoardPage";
 import TaskDetailPage from "./pages/TaskDetailPage";
@@ -21,7 +24,7 @@ import TeamPage from "./pages/TeamPage";
 import SettingsPage from "./pages/SettingsPage";
 import NotFoundPage from "./pages/NotFoundPage";
 
-const AUTH_ROUTES = ["/login", "/signup"];
+const AUTH_ROUTES = ["/login", "/signup", "/forgot-password", "/reset-password"];
 
 function App() {
   const location = useLocation();
@@ -35,6 +38,8 @@ function App() {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
       </Routes>
     );
   }
@@ -51,6 +56,7 @@ function App() {
   return (
     <BoardsProvider>
       <InvitationsProvider>
+      <NotificationsProvider>
       <TasksProvider>
         <UsersProvider>
           <div className="app">
@@ -75,6 +81,7 @@ function App() {
           </div>
         </UsersProvider>
       </TasksProvider>
+      </NotificationsProvider>
       </InvitationsProvider>
     </BoardsProvider>
   );

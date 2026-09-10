@@ -1,7 +1,7 @@
 // src/middleware/errorHandler.js
 import { NotFoundError } from "../utils/AppError.js";
 
-export function errorHandler(err, req, res, next) {
+export function errorHandler(err, req, res, _next) {
   const status = err.status ?? 500;
   const body = {
     message: status === 500 ? "Something went wrong" : err.message,

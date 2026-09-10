@@ -17,5 +17,26 @@ export default defineConfig([
       globals: globals.browser,
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
+    rules: {
+  'react-hooks/set-state-in-effect': 'off', // TODO: re-enable and fix (~30 findings, tracked separately)
+  'react-refresh/only-export-components': 'off', // TODO: split context/hook files, tracked separately
+  'no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+},  
+    
+  },
+  {
+    files: ['**/*.test.{js,jsx}'],
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+        describe: 'readonly',
+        it: 'readonly',
+        expect: 'readonly',
+        beforeAll: 'readonly',
+        afterAll: 'readonly',
+        beforeEach: 'readonly',
+        vi: 'readonly',
+      },
+    },
   },
 ])

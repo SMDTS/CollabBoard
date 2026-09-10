@@ -7,7 +7,10 @@
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
     "lint": "eslint src",
-    "seed:boards": "node src/scripts/seedBoards.js"
+    "seed:boards": "node src/scripts/seedBoards.js",
+    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest",
+    "test:watch": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --watch",
+    "test:coverage": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --coverage"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -16,9 +19,20 @@
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.24.4",
+    "node-cron": "^4.6.0",
+    "nodemailer": "^10.0.1",
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "eslint": "^9.0.0"
+    "@eslint/js": "^9.39.5",
+    "cross-env": "^10.1.0",
+    "eslint": "^9.0.0",
+    "globals": "^17.12.0",
+    "jest": "^30.5.1",
+    "mongodb-memory-server": "^11.2.0",
+    "supertest": "^7.2.2"
+  },
+  "allowScripts": {
+    "mongodb-memory-server@11.2.0": true
   }
 }

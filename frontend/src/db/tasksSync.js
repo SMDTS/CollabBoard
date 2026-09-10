@@ -55,13 +55,13 @@ export async function pushPendingDocs() {
   for (const doc of pending) {
     try {
       if (doc.pendingOp === "create") {
-        const { _id, _rev, syncStatus, pendingOp, serverVersion, ...task } = doc;
+        const { _id, _rev, syncStatus: _syncStatus, pendingOp: _pendingOp, serverVersion: _serverVersion, ...task } = doc;
         const created = await tasksApi.createTask(task);
         // Server assigned a real id: move the doc from its temp local id to the real one.
         await tasksDB.remove(doc);
         await tasksDB.put(toDoc(created));
       } else if (doc.pendingOp === "update") {
-        const { _id, _rev, syncStatus, pendingOp, serverVersion, ...patch } = doc;
+        const { _id, _rev, syncStatus: _syncStatus, pendingOp: _pendingOp, serverVersion: _serverVersion, ...patch } = doc;
         const updated = await tasksApi.updateTask(doc._id, patch);
         await tasksDB.put(toDoc(updated, { _rev: doc._rev }));
       } else if (doc.pendingOp === "delete") {

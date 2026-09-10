@@ -13,3 +13,8 @@ export const listUsers = catchAsync(async (req, res) => {
   const users = await userService.getAllUsers();
   res.json(users);
 });
+
+export const updateMyPreferences = catchAsync(async (req, res) => {
+  const updated = await userService.updatePreferences(req.user.id, req.body);
+  res.json(updated);
+});

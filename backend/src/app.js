@@ -11,6 +11,7 @@ import boardRoutes from "./routes/boardRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import activityRoutes from "./routes/activityRoutes.js";
 import invitationRoutes from "./routes/invitationRoutes.js";
+import notificationRoutes from "./routes/notificationRoutes.js";
 import { getDbState } from "./db/connect.js";
 
 const app = express();
@@ -30,6 +31,7 @@ app.use("/api/boards", boardRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/activity", activityRoutes);
 app.use("/api/invitations", invitationRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 app.use(notFoundHandler); // no route matched
 app.use(errorHandler); // LAST, always
