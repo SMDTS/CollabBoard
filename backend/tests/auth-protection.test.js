@@ -79,10 +79,18 @@ describe("authenticate edge cases", () => {
     expect(res.status).toBe(401);
     expect(res.body.error.message).toBe("Missing or malformed Authorization header");
   });
-
-  it("returns 401 for an empty Bearer token", async () => {
-    const res = await request(app).get("/api/tasks").set("Authorization", "Bearer ");
+  it("returns 401 for a Bearer scheme with no token attached", async () => {
+    // Note: a trailing space after "Bearer" is stripped as OWS (optional
+    // whitespace) by the HTTP client/server before authenticate ever sees
+    // it — "Bearer " and "Bearer  " both arrive here as plain "Bearer",
+    // which fails the `startsWith("Bearer ")` check and hits the
+    // missing/malformed branch. There's no way to send a "Bearer " prefix
+    // with an empty token via a real HTTP client, so that path isn't
+    // covered here.
+    const res = await request(app).get("/api/tasks").set("Authorization", "Bearer");
     expect(res.status).toBe(401);
-    expect(res.body.error.message).toBe("Invalid or expired token");
+    expect(res.body.error.message).toBe("Missing or malformed Authorization header");
   });
+ 
+  
 });
