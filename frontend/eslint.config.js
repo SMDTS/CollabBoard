@@ -24,19 +24,21 @@ export default defineConfig([
 },  
     
   },
-  {
-    files: ['**/*.test.{js,jsx}'],
-    languageOptions: {
-      globals: {
-        ...globals.browser,
-        describe: 'readonly',
-        it: 'readonly',
-        expect: 'readonly',
-        beforeAll: 'readonly',
-        afterAll: 'readonly',
-        beforeEach: 'readonly',
-        vi: 'readonly',
-      },
+{
+  files: ['**/*.test.{js,jsx}', '**/setupTests.js'],
+  languageOptions: {
+    globals: {
+      ...globals.browser,
+      describe: 'readonly',
+      it: 'readonly',
+      expect: 'readonly',
+      beforeAll: 'readonly',
+      afterAll: 'readonly',
+      beforeEach: 'readonly',
+      afterEach: 'readonly',
+      vi: 'readonly',
     },
   },
+},
 ])
+
