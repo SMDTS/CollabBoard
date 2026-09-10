@@ -7,6 +7,7 @@ import { useTasks } from "../context/TasksContext";
 import { useToast } from "../context/ToastContext";
 import { useBoards } from "../context/BoardsContext";
 import { useUsers } from "../context/UsersContext";
+import { updateMyPreferences } from "../api/users.js";
 
 const SHORTCUTS = [
   { keys: "B", action: "Toggle sidebar" },
@@ -20,7 +21,7 @@ const SHORTCUTS = [
 function SettingsPage() {
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
-  const { user, logout } = useAuth();
+  const { user, logout, updateUser } = useAuth();
   const mockTasks = useTasks();
   const { boards } = useBoards();
   const { users } = useUsers();
@@ -28,11 +29,32 @@ function SettingsPage() {
 
   const [name, setName] = useState(user?.name || "");
   const [email, setEmail] = useState(user?.email || "");
-  const [notifyEmail, setNotifyEmail] = useState(true);
-  const [notifyActivity, setNotifyActivity] = useState(true);
-  const [notifyWeekly, setNotifyWeekly] = useState(false);
+  // Seeded from the real, persisted preferences on the logged-in user
+  // (falls back to sensible defaults only if somehow missing).
+  const [notifyEmail, setNotifyEmail] = useState(user?.preferences?.notifyAssigned ?? true);
+  const [notifyActivity, setNotifyActivity] = useState(user?.preferences?.notifyActivity ?? true);
+  const [notifyWeekly, setNotifyWeekly] = useState(user?.preferences?.notifyWeekly ?? false);
+  const [savingPref, setSavingPref] = useState(null); // which toggle (if any) is mid-save
   const [timezone, setTimezone] = useState("UTC");
   const [dateFormat, setDateFormat] = useState("MMM D");
+
+  // Saves immediately on toggle (same eager-save pattern the theme toggle
+  // already uses) rather than requiring a separate "Save" button — but
+  // rolls the checkbox back if the request fails, so the UI never claims
+  // a preference is on when the server doesn't actually have it saved.
+  async function handleTogglePreference(key, setLocal, nextValue) {
+    setLocal(nextValue);
+    setSavingPref(key);
+    try {
+      const updated = await updateMyPreferences({ [key]: nextValue });
+      updateUser({ preferences: updated.preferences });
+    } catch (err) {
+      setLocal(!nextValue); // roll back
+      showToast(err.message || "Couldn't save that preference", "error");
+    } finally {
+      setSavingPref(null);
+    }
+  }
 
   function handleSaveAccount(e) {
     e.preventDefault();
@@ -164,15 +186,30 @@ function SettingsPage() {
           <h2 className="settings-section__title">Notifications</h2>
           <div className="settings-toggles">
             <label className="settings-toggle">
-              <input type="checkbox" checked={notifyEmail} onChange={(e) => setNotifyEmail(e.target.checked)} />
+              <input
+                type="checkbox"
+                checked={notifyEmail}
+                disabled={savingPref === "notifyAssigned"}
+                onChange={(e) => handleTogglePreference("notifyAssigned", setNotifyEmail, e.target.checked)}
+              />
               <span>Email me when I'm assigned a task</span>
             </label>
             <label className="settings-toggle">
-              <input type="checkbox" checked={notifyActivity} onChange={(e) => setNotifyActivity(e.target.checked)} />
+              <input
+                type="checkbox"
+                checked={notifyActivity}
+                disabled={savingPref === "notifyActivity"}
+                onChange={(e) => handleTogglePreference("notifyActivity", setNotifyActivity, e.target.checked)}
+              />
               <span>Notify me on board activity</span>
             </label>
             <label className="settings-toggle">
-              <input type="checkbox" checked={notifyWeekly} onChange={(e) => setNotifyWeekly(e.target.checked)} />
+              <input
+                type="checkbox"
+                checked={notifyWeekly}
+                disabled={savingPref === "notifyWeekly"}
+                onChange={(e) => handleTogglePreference("notifyWeekly", setNotifyWeekly, e.target.checked)}
+              />
               <span>Send a weekly summary email</span>
             </label>
           </div>

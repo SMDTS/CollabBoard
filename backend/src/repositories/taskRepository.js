@@ -100,6 +100,57 @@ export async function findById(id) {
   }
 }
 
+// Same shape as getStatsByBoardId's per-assignee counts, but across every
+// board at once — this is what the weekly summary email uses, one query
+// covering every user rather than looping board-by-board.
+export async function getWeeklySummaryForAllUsers() {
+  const now = new Date();
+  const currentYear = now.getUTCFullYear();
+  const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+
+  return Task.aggregate([
+    {
+      $set: {
+        parsedDueDate: {
+          $let: {
+            vars: {
+              isoAttempt: {
+                $dateFromString: { dateString: "$dueDate", onError: null, onNull: null },
+              },
+              monthDayAttempt: {
+                $dateFromString: {
+                  dateString: { $concat: ["$dueDate", ` ${currentYear}`] },
+                  format: "%b %d %Y",
+                  onError: null,
+                  onNull: null,
+                  timezone: "UTC",
+                },
+              },
+            },
+            in: { $ifNull: ["$$isoAttempt", "$$monthDayAttempt"] },
+          },
+        },
+      },
+    },
+    {
+      $group: {
+        _id: "$assigneeId",
+        taskCount: { $sum: 1 },
+        overdueCount: {
+          $sum: {
+            $cond: [
+              { $and: [{ $ne: ["$parsedDueDate", null] }, { $lt: ["$parsedDueDate", today] }] },
+              1,
+              0,
+            ],
+          },
+        },
+      },
+    },
+    { $project: { _id: 0, assigneeId: { $toString: "$_id" }, taskCount: 1, overdueCount: 1 } },
+  ]);
+}
+
 export async function create({ title, assignee, assigneeId, dueDate, description, boardId, columnId }) {
   return Task.create({ title, assignee, assigneeId, dueDate, description, boardId, columnId });
 }

@@ -21,3 +21,8 @@ export async function searchUsers(query, excludeUserId) {
   const users = await userRepository.search(trimmed);
   return users.filter((u) => u.id !== String(excludeUserId)).map(toPublic);
 }
+
+export async function updatePreferences(userId, patch) {
+  const user = await userRepository.updatePreferences(userId, patch);
+  return { id: user.id, name: user.name, email: user.email, preferences: user.preferences };
+}

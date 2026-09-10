@@ -15,3 +15,16 @@ export const me = catchAsync(async (req, res) => {
   const user = await authService.getUserById(req.user.id);
   res.json(user);
 });
+
+// Always returns 200 with a generic message, whether or not the email is
+// registered — see authService's comment on why. The frontend shows the
+// same "check your email" message either way.
+export const forgotPassword = catchAsync(async (req, res) => {
+  await authService.requestPasswordReset(req.body.email);
+  res.json({ message: "If that email is registered, a reset link has been sent." });
+});
+
+export const resetPassword = catchAsync(async (req, res) => {
+  await authService.resetPassword(req.body.token, req.body.password);
+  res.json({ message: "Password updated. You can now log in." });
+});

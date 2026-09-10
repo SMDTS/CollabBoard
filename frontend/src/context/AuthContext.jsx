@@ -39,7 +39,13 @@ export function AuthProvider({ children }) {
     setUser(null);
   }
 
-  const value = { user, isLoading, isAuthenticated: !!user, login, register, logout };
+  // Lets other parts of the app (e.g. Settings saving a preference) merge
+  // a partial update into the shared user object without a full re-fetch.
+  function updateUser(patch) {
+    setUser((prev) => (prev ? { ...prev, ...patch } : prev));
+  }
+
+  const value = { user, isLoading, isAuthenticated: !!user, login, register, logout, updateUser };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
