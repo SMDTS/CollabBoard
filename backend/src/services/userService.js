@@ -5,7 +5,7 @@ import * as userRepository from "../repositories/userRepository.js";
 // toPublicUser, duplicated here rather than shared since these two
 // services may diverge (e.g. if user profiles grow admin-only fields).
 function toPublic(u) {
-  return { id: u.id, name: u.name, email: u.email };
+  return { id: u.id, name: u.name, email: u.email, avatarUrl: u.avatarUrl || null };
 }
 
 export async function getAllUsers() {
@@ -24,5 +24,10 @@ export async function searchUsers(query, excludeUserId) {
 
 export async function updatePreferences(userId, patch) {
   const user = await userRepository.updatePreferences(userId, patch);
-  return { id: user.id, name: user.name, email: user.email, preferences: user.preferences };
+  return { id: user.id, name: user.name, email: user.email, avatarUrl: user.avatarUrl || null, preferences: user.preferences };
+}
+
+export async function updateAvatar(userId, avatarUrl) {
+  const user = await userRepository.updateAvatar(userId, avatarUrl);
+  return { id: user.id, name: user.name, email: user.email, avatarUrl: user.avatarUrl || null, preferences: user.preferences };
 }

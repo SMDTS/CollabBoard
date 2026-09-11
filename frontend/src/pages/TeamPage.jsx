@@ -1,9 +1,11 @@
 // TeamPage.jsx
 import { useState, useEffect, useCallback } from "react";
+import { motion } from "framer-motion";
 import { useBoards } from "../context/BoardsContext";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import { searchUsers } from "../api/users.js";
+import { AUTH_BG } from "../assets/cdn.js";
 import {
   fetchBoardStats,
   fetchBoardMembers,
@@ -11,6 +13,8 @@ import {
   inviteBoardMember,
   kickBoardMember,
 } from "../api/boards.js";
+import UserAvatar from "../components/UserAvatar.jsx";
+import ConfirmModal from "../components/ConfirmModal.jsx";
 
 const ACCENTS = ["team-accent--violet", "team-accent--sky", "team-accent--green"];
 const SEARCH_DEBOUNCE_MS = 300;
@@ -123,27 +127,41 @@ function TeamPage() {
     };
   }, [query, isOwner]);
 
-  async function handleInvite(email, userId) {
-    setInvitingId(userId);
+  async function handleInvite(email, targetUserId) {
+    if (!boardId) return;
+    setInvitingId(targetUserId);
     try {
       await inviteBoardMember(boardId, email);
-      showToast(`Invite sent to ${email}`, "success");
-      loadPendingInvites();
+      showToast(`Invited ${email}`, "success");
+      const updated = await fetchBoardInvitations(boardId);
+      setInvitations(updated);
     } catch (err) {
-      showToast(err.message || "Couldn't send that invite", "error");
+      showToast(err.message || "Couldn't invite user", "error");
     } finally {
       setInvitingId(null);
     }
   }
 
-  async function handleKick(memberId, memberName) {
-    if (!window.confirm(`Remove ${memberName} from this board?`)) return;
+  const [memberToKick, setMemberToKick] = useState(null);
+  const [isKicking, setIsKicking] = useState(false);
+
+  function handlePromptKick(memberId, memberName) {
+    if (!boardId || !isOwner) return;
+    setMemberToKick({ id: memberId, name: memberName });
+  }
+
+  async function executeKick() {
+    if (!memberToKick || !boardId || !isOwner) return;
+    setIsKicking(true);
     try {
-      const updated = await kickBoardMember(boardId, memberId);
-      setMembers(updated);
-      showToast(`Removed ${memberName}`, "success");
+      await kickBoardMember(boardId, memberToKick.id);
+      showToast(`Removed ${memberToKick.name}`, "success");
+      setMembers((prev) => prev.filter((m) => m.id !== memberToKick.id));
+      setMemberToKick(null);
     } catch (err) {
-      showToast(err.message || "Couldn't remove that member", "error");
+      showToast(err.message || "Couldn't remove member", "error");
+    } finally {
+      setIsKicking(false);
     }
   }
 
@@ -153,44 +171,91 @@ function TeamPage() {
       m.email.toLowerCase().includes(query.toLowerCase())
   );
 
-  // Someone the search turned up who isn't already on this board — that's
-  // who gets an "Invite" button. Already-invited people show as pending.
   const memberIds = new Set(members.map((m) => m.id));
   const invitableResults = searchResults.filter((u) => !memberIds.has(u.id));
 
   return (
-    <div className="page-shell">
-      <div className="team-page__header">
-        <div>
-          <h1 className="page-shell__title">Team</h1>
-          <p className="page-shell__subtitle" style={{ marginBottom: 0 }}>
-            {board
-              ? `${members.length} ${members.length === 1 ? "member" : "members"} on "${board.name}".`
-              : "Pick a board to see its members."}
-          </p>
+    <motion.div
+      className="page-shell bp2"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.3 }}
+    >
+      <div className="bp2-bg" style={{ backgroundImage: `url(${AUTH_BG})` }} aria-hidden="true" />
+      <div className="bp2-bg-overlay" aria-hidden="true" />
+      <div className="bp2-glow bp2-glow--a" aria-hidden="true" />
+      <div className="bp2-glow bp2-glow--b" aria-hidden="true" />
+
+      <motion.div
+        className="bp2-frame"
+        initial={{ opacity: 0, y: 15, scale: 0.985 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
+      >
+        <div className="team-page__header">
+          <div className="team-page__titles">
+            <h1 className="bp2-title" style={{ fontSize: 24, fontWeight: 800, margin: "0 0 4px" }}>Team Directory</h1>
+            <p className="bp2-subtitle" style={{ marginBottom: 0 }}>
+              {board
+                ? `${members.length} ${members.length === 1 ? "member" : "members"} on "${board.name}".`
+                : "Select a board to manage team members."}
+            </p>
+          </div>
+
+          <div className="team-controls">
+            {/* Board Selector */}
+            <div className="team-control-group">
+              <span className="team-control-label">Board</span>
+              <div className="team-select-box">
+                <svg className="team-control-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="2" />
+                  <path d="M9 3v18" />
+                  <path d="M14 9h7" />
+                  <path d="M14 15h7" />
+                </svg>
+                <select
+                  className="team-select-input"
+                  value={boardId}
+                  onChange={(e) => setBoardId(e.target.value)}
+                  disabled={boardsLoading || boards.length === 0}
+                >
+                  {boards.map((b) => (
+                    <option key={b.id} value={b.id}>
+                      {b.name}
+                    </option>
+                  ))}
+                </select>
+                <svg className="team-select-arrow" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </div>
+            </div>
+
+            {/* Member Search */}
+            <div className="team-control-group">
+              <span className="team-control-label">Filter & Invite</span>
+              <div className="team-search-box">
+                <svg className="team-control-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="11" cy="11" r="7" />
+                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
+                <input
+                  type="text"
+                  className="team-search-input"
+                  placeholder="Search name or email…"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                />
+                {query && (
+                  <button type="button" className="team-search-clear" onClick={() => setQuery("")} aria-label="Clear search">
+                    ×
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
-
-        <select
-          className="team-search"
-          value={boardId}
-          onChange={(e) => setBoardId(e.target.value)}
-          disabled={boardsLoading || boards.length === 0}
-        >
-          {boards.map((b) => (
-            <option key={b.id} value={b.id}>
-              {b.name}
-            </option>
-          ))}
-        </select>
-
-        <input
-          type="text"
-          className="team-search"
-          placeholder="Search by name or email…"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
-      </div>
 
       {boardsLoading && <p className="page-shell__subtitle">Loading boards…</p>}
       {!boardsLoading && boards.length === 0 && (
@@ -203,47 +268,76 @@ function TeamPage() {
       {!membersLoading && !membersError && board && (
         <>
           <div className="team-grid">
-            {filteredMembers.map((member, i) => {
+            {filteredMembers.map((member) => {
               const memberStats = stats[member.id] ?? { taskCount: 0, overdueCount: 0 };
               const { taskCount, overdueCount } = memberStats;
               const onTrackPct = taskCount ? Math.round(((taskCount - overdueCount) / taskCount) * 100) : 100;
 
               return (
-                <div className={`team-card ${ACCENTS[i % ACCENTS.length]}`} key={member.id}>
+                <div className="team-card" key={member.id}>
+                  {/* Top Ambient Glow */}
+                  <div className="team-card__glow" aria-hidden="true" />
+
                   {isOwner && member.role !== "owner" && (
                     <button
                       type="button"
                       className="team-card__kick"
-                      onClick={() => handleKick(member.id, member.name)}
+                      onClick={() => handlePromptKick(member.id, member.name)}
                       title={`Remove ${member.name}`}
                     >
                       ×
                     </button>
                   )}
+
+                  {/* Avatar */}
                   <div className="team-card__avatar-wrap">
-                    <div className="team-card__avatar">{initials(member.name)}</div>
+                    <UserAvatar user={member} size={64} className="team-card__avatar-img" />
+                    <span className="team-card__status-dot" aria-hidden="true" />
                   </div>
+
+                  {/* User Info */}
                   <div className="team-card__info">
-                    <h2 className="team-card__name">
-                      {member.name} {member.role === "owner" && <span className="team-card__owner-badge">Owner</span>}
-                    </h2>
+                    <div className="team-card__name-row">
+                      <h3 className="team-card__name">{member.name}</h3>
+                      <span className="team-card__role-badge">
+                        {member.role === "owner" ? "Owner" : "Member"}
+                      </span>
+                    </div>
                     <p className="team-card__email">{member.email}</p>
                   </div>
 
-                  <div className="team-card__progress">
+                  {/* Progress Bar Section */}
+                  <div className="team-card__progress-sec">
                     <div className="team-card__progress-track">
-                      <div className="team-card__progress-fill" style={{ width: `${onTrackPct}%` }} />
+                      <div
+                        className="team-card__progress-fill"
+                        style={{ width: `${onTrackPct}%` }}
+                      />
                     </div>
-                    <span className="team-card__progress-label">{`${onTrackPct}% on track`}</span>
+                    <p className="team-card__progress-subtext">
+                      <span className="team-card__progress-highlight">{onTrackPct}%</span> on track
+                    </p>
                   </div>
 
-                  <div className="team-card__stats">
-                    <span className="team-card__stat">
-                      <strong>{taskCount}</strong> tasks
-                    </span>
-                    <span className="team-card__stat">
-                      <strong>{overdueCount}</strong> overdue
-                    </span>
+                  {/* Divider */}
+                  <div className="team-card__divider" />
+
+                  {/* Task Statistics */}
+                  <div className="team-card__stats-grid">
+                    <div className="team-card__stat-col">
+                      <span className="team-card__stat-val">{taskCount}</span>
+                      <span className="team-card__stat-lbl">tasks</span>
+                    </div>
+                    <div className="team-card__stat-col">
+                      <span
+                        className={`team-card__stat-val ${
+                          overdueCount > 0 ? "team-card__stat-val--rose" : ""
+                        }`}
+                      >
+                        {overdueCount}
+                      </span>
+                      <span className="team-card__stat-lbl">overdue</span>
+                    </div>
                   </div>
                 </div>
               );
@@ -265,7 +359,7 @@ function TeamPage() {
                   const pending = pendingInvites[u.id];
                   return (
                     <div className="team-invite-row" key={u.id}>
-                      <div className="team-invite-row__avatar">{initials(u.name)}</div>
+                      <UserAvatar user={u} size={32} />
                       <div className="team-invite-row__info">
                         <span className="team-invite-row__name">{u.name}</span>
                         <span className="team-invite-row__email">{u.email}</span>
@@ -285,7 +379,19 @@ function TeamPage() {
           )}
         </>
       )}
-    </div>
+      </motion.div>
+
+      <ConfirmModal
+        isOpen={!!memberToKick}
+        onClose={() => setMemberToKick(null)}
+        onConfirm={executeKick}
+        title="Remove Team Member"
+        message={memberToKick ? `Are you sure you want to remove ${memberToKick.name} from "${board?.name || "this board"}"?` : ""}
+        confirmText="Remove Member"
+        danger={true}
+        isLoading={isKicking}
+      />
+    </motion.div>
   );
 }
 

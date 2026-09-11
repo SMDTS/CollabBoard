@@ -1,5 +1,6 @@
-// src/api/users.js
-import { apiFetch } from "./client.js";
+import { apiFetch, getToken } from "./client.js";
+
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
 
 export function fetchUsers() {
   return apiFetch("/api/users");
@@ -18,5 +19,32 @@ export function updateMyPreferences(patch) {
   return apiFetch("/api/users/me/preferences", {
     method: "PATCH",
     body: JSON.stringify(patch),
+  });
+}
+
+export async function uploadAvatarFile(file) {
+  const token = getToken();
+  const formData = new FormData();
+  formData.append("avatar", file);
+
+  const res = await fetch(`${BASE_URL}/api/users/me/avatar`, {
+    method: "POST",
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: formData,
+  });
+
+  const data = await res.json().catch(() => null);
+  if (!res.ok) {
+    throw new Error(data?.error?.message || "Failed to upload image");
+  }
+  return data;
+}
+
+export function updateAvatarUrl(avatarUrl) {
+  return apiFetch("/api/users/me/avatar", {
+    method: "PATCH",
+    body: JSON.stringify({ avatarUrl }),
   });
 }

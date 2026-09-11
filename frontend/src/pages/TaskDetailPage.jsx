@@ -1,6 +1,7 @@
 
 import { useEffect, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import { useTasks, useTasksActions } from "../context/TasksContext";
 import { useBoards } from "../context/BoardsContext";
 import { useAuth } from "../context/AuthContext";
@@ -8,6 +9,7 @@ import { useToast } from "../context/ToastContext";
 import { fetchBoardMembers } from "../api/boards.js";
 import { avatarColor } from "../utils/avatarColor";
 import { getColumns } from "../utils/columns";
+import { AUTH_BG } from "../assets/cdn.js";
 
 const STATUS_ACCENT = {
   "To Do": "var(--cb-violet)",
@@ -45,9 +47,11 @@ function TaskDetailPage() {
 
   if (!task) {
     return (
-      <div className="page-shell">
-        <p>No task found with id "{id}". It may have been deleted.</p>
-        <Link to="/my-tasks" className="back-link">
+      <div className="page-shell bp2">
+        <div className="bp2-bg" style={{ backgroundImage: `url(${AUTH_BG})` }} aria-hidden="true" />
+        <div className="bp2-bg-overlay" aria-hidden="true" />
+        <p style={{ color: "#fff", position: "relative", zIndex: 1 }}>No task found with id "{id}". It may have been deleted.</p>
+        <Link to="/my-tasks" className="bp2-back-link">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" /></svg>
           Back to My Tasks
         </Link>
@@ -58,8 +62,6 @@ function TaskDetailPage() {
   const columns = getColumns(board);
   const currentColumn = columns.find((c) => c.id === task.columnId);
 
-  // Only the board owner can edit or delete a task; the assigned member
-  // can move it between columns and nothing else.
   const isOwner = !!board && board.ownerId === user?.id;
   const isAssignee = task.assigneeId === user?.id;
   const canMove = isOwner || isAssignee;
@@ -79,8 +81,25 @@ function TaskDetailPage() {
   }
 
   return (
-    <div className="page-shell task-detail-page">
-      <div className="task-detail-wrap">
+    <motion.div
+      className="page-shell bp2 task-detail-page"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.3 }}
+    >
+      <div className="bp2-bg" style={{ backgroundImage: `url(${AUTH_BG})` }} aria-hidden="true" />
+      <div className="bp2-bg-overlay" aria-hidden="true" />
+      <div className="bp2-glow bp2-glow--a" aria-hidden="true" />
+      <div className="bp2-glow bp2-glow--b" aria-hidden="true" />
+
+      <motion.div
+        className="bp2-frame"
+        initial={{ opacity: 0, y: 15, scale: 0.985 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
+      >
+        <div className="task-detail-wrap">
         <Link to="/my-tasks" className="back-link">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" /></svg>
           Back to My Tasks
@@ -175,8 +194,9 @@ function TaskDetailPage() {
         )}
         </div>
       </div>
-    </div>
-  );
+    </motion.div>
+  </motion.div>
+);
 }
 
 export default TaskDetailPage;

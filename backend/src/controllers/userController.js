@@ -1,11 +1,9 @@
-// src/controllers/userController.js
 import * as userService from "../services/userService.js";
 import { catchAsync } from "../utils/catchAsync.js";
+import { uploadStream } from "../config/cloudinary.js";
+import { BadRequestError } from "../utils/AppError.js";
 
 export const listUsers = catchAsync(async (req, res) => {
-  // ?q=... switches this into a search-by-name-or-email lookup (used by
-  // the Team page to find someone to invite); no q keeps the old
-  // "everyone" behavior other pages still rely on.
   if (typeof req.query.q === "string" && req.query.q.trim()) {
     const results = await userService.searchUsers(req.query.q, req.user.id);
     return res.json(results);
@@ -17,4 +15,24 @@ export const listUsers = catchAsync(async (req, res) => {
 export const updateMyPreferences = catchAsync(async (req, res) => {
   const updated = await userService.updatePreferences(req.user.id, req.body);
   res.json(updated);
+});
+
+export const uploadAvatarFile = catchAsync(async (req, res) => {
+  if (!req.file) {
+    throw new BadRequestError("No image file provided");
+  }
+
+  if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY) {
+    throw new BadRequestError("Cloudinary is not configured on the server. Please check environment variables.");
+  }
+
+  const result = await uploadStream(req.file.buffer);
+  const updatedUser = await userService.updateAvatar(req.user.id, result.secure_url);
+  res.json(updatedUser);
+});
+
+export const updateAvatarUrl = catchAsync(async (req, res) => {
+  const { avatarUrl } = req.body;
+  const updatedUser = await userService.updateAvatar(req.user.id, avatarUrl || null);
+  res.json(updatedUser);
 });

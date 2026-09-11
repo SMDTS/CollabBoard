@@ -1,11 +1,12 @@
 // TopBar.jsx
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
 import { useInvitations, useInvitationsActions } from "../context/InvitationsContext";
 import { useNotifications, useNotificationsActions } from "../context/NotificationsContext";
 import { useToast } from "../context/ToastContext";
+import UserAvatar from "./UserAvatar.jsx";
 
 function initials(name) {
   return (name || "?").slice(0, 2).toUpperCase();
@@ -32,6 +33,11 @@ function timeAgo(isoString) {
 
 function TopBar({ onOpenSearch }) {
   const navigate = useNavigate();
+  const location = useLocation();
+  // The Dashboard page has its own dark theme — the topbar switches to a
+  // matching frosted "mirror" look only there, so every other (still
+  // light-themed) page keeps the normal topbar unchanged.
+  const isDarkPage = location.pathname === "/dashboard";
   const { theme, toggleTheme } = useTheme();
   const { user, logout } = useAuth();
   const { invitations } = useInvitations();
@@ -80,7 +86,7 @@ function TopBar({ onOpenSearch }) {
   }, []);
 
   return (
-    <div className="topbar">
+    <div className="topbar topbar--mirror">
       <div className="topbar__datetime">{formatDateTime(now)}</div>
 
       <button className="topbar__search" onClick={onOpenSearch}>
@@ -186,8 +192,8 @@ function TopBar({ onOpenSearch }) {
         </div>
 
         <div className="topbar__profile">
-          <button className="topbar__avatar" onClick={() => setMenuOpen((prev) => !prev)} aria-label="Profile menu">
-            {initials(user?.name)}
+          <button className="topbar__avatar" onClick={() => setMenuOpen((prev) => !prev)} aria-label="Profile menu" style={{ padding: 0, overflow: "hidden", borderRadius: "50%", background: "none", border: "none" }}>
+            <UserAvatar user={user} size={32} />
           </button>
 
           {menuOpen && (
