@@ -43,7 +43,7 @@ function TaskDetailPage() {
     return () => {
       cancelled = true;
     };
-  }, [board?.id]);
+  }, [board]);
 
   if (!task) {
     return (

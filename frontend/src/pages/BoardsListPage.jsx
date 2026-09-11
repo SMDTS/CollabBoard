@@ -2,10 +2,9 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { useBoards, useBoardsActions } from "../context/BoardsContext";
+import { useBoards } from "../context/BoardsContext";
 import { useTasks } from "../context/TasksContext";
 import { useAuth } from "../context/AuthContext";
-import { useToast } from "../context/ToastContext";
 import { AUTH_BG } from "../assets/cdn.js";
 import "../styles/boardsV2.css";
 
@@ -15,19 +14,13 @@ import BoardSettingsModal from "../components/BoardSettingsModal";
 const ACCENTS = ["bv2-accent--violet", "bv2-accent--sky", "bv2-accent--indigo"];
 
 function initials(name) {
-  return name
-    .split(" ")
-    .map((w) => w[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
+  return (name || "?").slice(0, 2).toUpperCase();
 }
 
 function BoardsListPage() {
   const { boards, isLoading, error } = useBoards();
   const tasks = useTasks();
   const { user } = useAuth();
-  const showToast = useToast();
   const [selectedId, setSelectedId] = useState(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);

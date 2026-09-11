@@ -1,6 +1,5 @@
-// TopBar.jsx
 import { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
 import { useInvitations, useInvitationsActions } from "../context/InvitationsContext";
@@ -8,18 +7,12 @@ import { useNotifications, useNotificationsActions } from "../context/Notificati
 import { useToast } from "../context/ToastContext";
 import UserAvatar from "./UserAvatar.jsx";
 
-function initials(name) {
-  return (name || "?").slice(0, 2).toUpperCase();
-}
-
 function formatDateTime(date) {
   const dateStr = date.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
   const timeStr = date.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
   return `${dateStr} · ${timeStr}`;
 }
 
-// "3m ago" / "2h ago" / "5d ago" — notifications are frequent enough that
-// a full date+time per item would be noisy; a relative age reads faster.
 function timeAgo(isoString) {
   const seconds = Math.floor((Date.now() - new Date(isoString).getTime()) / 1000);
   if (seconds < 60) return "just now";
@@ -33,11 +26,6 @@ function timeAgo(isoString) {
 
 function TopBar({ onOpenSearch }) {
   const navigate = useNavigate();
-  const location = useLocation();
-  // The Dashboard page has its own dark theme — the topbar switches to a
-  // matching frosted "mirror" look only there, so every other (still
-  // light-themed) page keeps the normal topbar unchanged.
-  const isDarkPage = location.pathname === "/dashboard";
   const { theme, toggleTheme } = useTheme();
   const { user, logout } = useAuth();
   const { invitations } = useInvitations();

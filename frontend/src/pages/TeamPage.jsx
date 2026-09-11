@@ -15,13 +15,7 @@ import {
 } from "../api/boards.js";
 import UserAvatar from "../components/UserAvatar.jsx";
 import ConfirmModal from "../components/ConfirmModal.jsx";
-
-const ACCENTS = ["team-accent--violet", "team-accent--sky", "team-accent--green"];
 const SEARCH_DEBOUNCE_MS = 300;
-
-function initials(name) {
-  return (name || "?").slice(0, 2).toUpperCase();
-}
 
 function TeamPage() {
   const [query, setQuery] = useState("");
@@ -133,8 +127,7 @@ function TeamPage() {
     try {
       await inviteBoardMember(boardId, email);
       showToast(`Invited ${email}`, "success");
-      const updated = await fetchBoardInvitations(boardId);
-      setInvitations(updated);
+      await loadPendingInvites();
     } catch (err) {
       showToast(err.message || "Couldn't invite user", "error");
     } finally {

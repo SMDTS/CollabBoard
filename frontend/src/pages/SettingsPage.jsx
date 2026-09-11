@@ -8,7 +8,6 @@ import { useToast } from "../context/ToastContext";
 import { useBoards } from "../context/BoardsContext";
 import { useUsers } from "../context/UsersContext";
 import { updateMyPreferences, uploadAvatarFile, updateAvatarUrl } from "../api/users.js";
-import { avatarColor } from "../utils/avatarColor";
 import { AUTH_BG } from "../assets/cdn.js";
 import UserAvatar from "../components/UserAvatar.jsx";
 
@@ -20,10 +19,6 @@ const SHORTCUTS = [
   { keys: "⌘ + B", action: "Go to Boards" },
   { keys: "⌘ + D", action: "Go to Dashboard" },
 ];
-
-function initials(name) {
-  return (name || "?").slice(0, 2).toUpperCase();
-}
 
 function SettingsPage() {
   const navigate = useNavigate();
@@ -86,7 +81,7 @@ function SettingsPage() {
       updateUser(updatedUser);
       setAvatarUrlInput("");
       showToast("Profile picture removed", "info");
-    } catch (err) {
+    } catch {
       showToast("Failed to remove profile picture", "error");
     }
   }

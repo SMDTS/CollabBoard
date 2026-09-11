@@ -16,10 +16,6 @@ const NAV_ITEMS = [
 const SPRING = { type: "spring", stiffness: 350, damping: 30 };
 const LABEL_TRANSITION = { duration: 0.15 };
 
-function initials(name) {
-  return (name || "?").slice(0, 2).toUpperCase();
-}
-
 function NavLabel({ show, children }) {
   return (
     <AnimatePresence initial={false}>

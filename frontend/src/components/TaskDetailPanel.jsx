@@ -5,10 +5,6 @@ import { useToast } from "../context/ToastContext";
 import { getColumns } from "../utils/columns";
 import UserAvatar from "./UserAvatar.jsx";
 
-function initials(name) {
-  return (name || "?").slice(0, 2).toUpperCase();
-}
-
 function TaskDetailPanel({ taskId, onClose, isOwner, currentUserId, members = [] }) {
   const tasks = useTasks();
   const { boards } = useBoards();

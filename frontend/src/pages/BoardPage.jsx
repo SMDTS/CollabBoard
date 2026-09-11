@@ -9,20 +9,15 @@ import { getColumns } from "../utils/columns";
 import Board from "../components/Board";
 import TaskDetailPanel from "../components/TaskDetailPanel";
 import BoardSettingsModal from "../components/BoardSettingsModal";
-import { avatarColor } from "../utils/avatarColor";
 import { fetchBoardMembers } from "../api/boards.js";
 import { AUTH_BG } from "../assets/cdn.js";
 import UserAvatar from "../components/UserAvatar.jsx";
 import "../styles/boardPageV2.css";
 
 function initials(name) {
-  return name
-    .split(" ")
-    .map((w) => w[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
+  return (name || "?").slice(0, 2).toUpperCase();
 }
+
 
 function BoardPage() {
   const { boardId } = useParams();
@@ -54,7 +49,7 @@ function BoardPage() {
     return () => {
       cancelled = true;
     };
-  }, [board?.id]);
+  }, [board]);
 
   if (isLoading) {
     return (
