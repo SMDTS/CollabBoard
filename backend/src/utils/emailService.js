@@ -2,13 +2,12 @@
 import nodemailer from "nodemailer";
 import { config } from "../config.js";
 
-// If SMTP isn't configured, every "sent" email is logged to the console
-// instead of actually going anywhere. This means the forgot-password flow
-// and every notification email work end-to-end for local dev and testing
-// without anyone needing real email credentials — a teammate can register,
-// request a reset, and grab the link straight out of their own terminal.
-// Set SMTP_HOST/SMTP_PORT/SMTP_USER/SMTP_PASS in .env to actually deliver.
-const isConfigured = Boolean(config.smtp.host && config.smtp.user && config.smtp.pass);
+// Jest sets this automatically for every worker — no config needed, and
+// impossible to forget, unlike relying on NODE_ENV=test being set correctly.
+// This guarantees tests never make a real network call to a mail provider,
+// even if the developer running them has real SMTP credentials in .env.
+const isTestEnv = process.env.JEST_WORKER_ID !== undefined;
+const isConfigured = !isTestEnv && Boolean(config.smtp.host && config.smtp.user && config.smtp.pass);
 
 let transporter = null;
 function getTransporter() {

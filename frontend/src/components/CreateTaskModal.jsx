@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { useTasksActions } from "../context/TasksContext";
 import { useToast } from "../context/ToastContext";
 import DateTimePicker from "./DateTimePicker";
+import { AUTH_BG } from "../assets/cdn.js";
 
 function CreateTaskModal({ isOpen, onClose, boardId, columns = [], members = [], defaultColumnId }) {
   const { addTask } = useTasksActions();
@@ -68,12 +69,15 @@ function CreateTaskModal({ isOpen, onClose, boardId, columns = [], members = [],
 
   return (
     <>
-      <div className="modal-backdrop" onClick={onClose} />
-      <div className="modal" role="dialog" aria-modal="true" aria-label="Create task">
-        <form className="modal__card" onSubmit={handleSubmit}>
-          <div className="modal__header">
-            <h2 className="modal__title">New task</h2>
-            <button type="button" className="modal__close" onClick={onClose} aria-label="Close">
+      <div className="bp2-modal-backdrop" onClick={onClose} />
+      <div className="bp2-modal" role="dialog" aria-modal="true" aria-label="Create task">
+        <form className="bp2-modal__card" onSubmit={handleSubmit}>
+          <div className="bp2-modal__card-bg" style={{ backgroundImage: `url(${AUTH_BG})` }} aria-hidden="true" />
+          <div className="bp2-modal__card-overlay" aria-hidden="true" />
+          <div className="bp2-modal__card-glow" aria-hidden="true" />
+          <div className="bp2-modal__header">
+            <h2 className="bp2-modal__title">New task</h2>
+            <button type="button" className="bp2-modal__close" onClick={onClose} aria-label="Close">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                 <line x1="18" y1="6" x2="6" y2="18" />
                 <line x1="6" y1="6" x2="18" y2="18" />
@@ -81,13 +85,13 @@ function CreateTaskModal({ isOpen, onClose, boardId, columns = [], members = [],
             </button>
           </div>
 
-          <div className="modal__body">
-            <div className="modal__field">
-              <label className="modal__label" htmlFor="task-title">Title</label>
+          <div className="bp2-modal__body">
+            <div className="bp2-modal__field">
+              <label className="bp2-modal__label" htmlFor="task-title">Title</label>
               <input
                 id="task-title"
                 ref={titleRef}
-                className="modal__input"
+                className="bp2-modal__input"
                 placeholder="e.g. Design the empty-state illustration"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
@@ -95,11 +99,11 @@ function CreateTaskModal({ isOpen, onClose, boardId, columns = [], members = [],
               />
             </div>
 
-            <div className="modal__field">
-              <label className="modal__label" htmlFor="task-description">Description</label>
+            <div className="bp2-modal__field">
+              <label className="bp2-modal__label" htmlFor="task-description">Description</label>
               <textarea
                 id="task-description"
-                className="modal__textarea"
+                className="bp2-modal__textarea"
                 placeholder="Add more detail about this task… (optional)"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
@@ -107,12 +111,12 @@ function CreateTaskModal({ isOpen, onClose, boardId, columns = [], members = [],
               />
             </div>
 
-            <div className="modal__row">
-              <div className="modal__field">
-                <label className="modal__label" htmlFor="task-status">Status</label>
+            <div className="bp2-modal__row">
+              <div className="bp2-modal__field">
+                <label className="bp2-modal__label" htmlFor="task-status">Status</label>
                 <select
                   id="task-status"
-                  className="modal__input"
+                  className="bp2-modal__input"
                   value={columnId}
                   onChange={(e) => setColumnId(e.target.value)}
                 >
@@ -124,11 +128,11 @@ function CreateTaskModal({ isOpen, onClose, boardId, columns = [], members = [],
                 </select>
               </div>
 
-              <div className="modal__field">
-                <label className="modal__label" htmlFor="task-assignee">Assignee</label>
+              <div className="bp2-modal__field">
+                <label className="bp2-modal__label" htmlFor="task-assignee">Assignee</label>
                 <select
                   id="task-assignee"
-                  className="modal__input"
+                  className="bp2-modal__input"
                   value={assigneeId}
                   onChange={(e) => setAssigneeId(e.target.value)}
                 >
@@ -142,17 +146,17 @@ function CreateTaskModal({ isOpen, onClose, boardId, columns = [], members = [],
               </div>
             </div>
 
-            <div className="modal__field">
-              <label className="modal__label" htmlFor="task-due">Due date &amp; time</label>
+            <div className="bp2-modal__field">
+              <label className="bp2-modal__label" htmlFor="task-due">Due date &amp; time</label>
               <DateTimePicker value={dueDate} onChange={setDueDate} />
             </div>
           </div>
 
-          <div className="modal__footer">
-            <button type="button" className="modal__btn modal__btn--ghost" onClick={onClose}>
+          <div className="bp2-modal__footer">
+            <button type="button" className="bp2-modal__btn bp2-modal__btn--ghost" onClick={onClose}>
               Cancel
             </button>
-            <button type="submit" className="modal__btn modal__btn--primary" disabled={!canSubmit}>
+            <button type="submit" className="bp2-modal__btn bp2-modal__btn--primary" disabled={!canSubmit}>
               {isSubmitting ? "Adding…" : "Create task"}
             </button>
           </div>

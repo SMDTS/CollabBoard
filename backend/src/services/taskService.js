@@ -98,7 +98,7 @@ export async function createTask(data, actorId) {
     taskTitle: task.title,
   });
 
-  await notifyAssignment(assigneeUser, task, board.name);
+notifyAssignment(assigneeUser, task, board.name).catch((err) => console.error("Notify failed:", err));
 
   return task;
 }

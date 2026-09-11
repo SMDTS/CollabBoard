@@ -11,6 +11,7 @@ const userSchema = new mongoose.Schema(
     // are hashed — if the database ever leaked, the raw tokens (which are
     // valid to reset a password with zero other proof of identity)
     // shouldn't leak with it.
+    avatarUrl: { type: String, default: null },
     passwordResetTokenHash: { type: String, select: false },
     passwordResetExpires: { type: Date, select: false },
     preferences: {
