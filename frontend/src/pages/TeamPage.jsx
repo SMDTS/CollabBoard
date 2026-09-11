@@ -1,6 +1,6 @@
 // TeamPage.jsx
-import { useState, useEffect, useCallback } from "react";
-import { motion } from "framer-motion";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useBoards } from "../context/BoardsContext";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
@@ -16,6 +16,183 @@ import {
 import UserAvatar from "../components/UserAvatar.jsx";
 import ConfirmModal from "../components/ConfirmModal.jsx";
 const SEARCH_DEBOUNCE_MS = 300;
+
+function BoardSelectDropdown({ boards, selectedBoardId, onSelectBoard, isLoading }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef(null);
+
+  const selectedBoard = boards.find((b) => b.id === selectedBoardId);
+
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (containerRef.current && !containerRef.current.contains(e.target)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  return (
+    <div className="team-select-container" ref={containerRef} style={{ position: "relative", minWidth: 200 }}>
+      <button
+        type="button"
+        className={`team-custom-select ${isOpen ? "team-custom-select--open" : ""}`}
+        onClick={() => !isLoading && boards.length > 0 && setIsOpen((prev) => !prev)}
+        disabled={isLoading || boards.length === 0}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          padding: "9px 14px",
+          borderRadius: 12,
+          background: "rgba(255, 255, 255, 0.07)",
+          backdropFilter: "blur(16px)",
+          WebkitBackdropFilter: "blur(16px)",
+          border: "1px solid rgba(255, 255, 255, 0.14)",
+          color: "#ffffff",
+          cursor: isLoading || boards.length === 0 ? "not-allowed" : "pointer",
+          width: "100%",
+          justifyContent: "space-between",
+          fontSize: 14,
+          fontWeight: 600,
+          transition: "all 0.15s ease",
+          boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 10, overflow: "hidden" }}>
+          <span
+            style={{
+              width: 24,
+              height: 24,
+              borderRadius: 6,
+              background: "linear-gradient(135deg, #8b6ff2 0%, #6366f1 100%)",
+              color: "#ffffff",
+              fontSize: 11,
+              fontWeight: 800,
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+            }}
+          >
+            {selectedBoard ? selectedBoard.name.slice(0, 2).toUpperCase() : "?"}
+          </span>
+          <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+            {selectedBoard ? selectedBoard.name : isLoading ? "Loading boards…" : "Select a board"}
+          </span>
+        </div>
+        <motion.svg
+          animate={{ rotate: isOpen ? 180 : 0 }}
+          transition={{ duration: 0.2 }}
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          style={{ flexShrink: 0, color: "#94a3b8" }}
+        >
+          <polyline points="6 9 12 15 18 9" />
+        </motion.svg>
+      </button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 8, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 6, scale: 0.96 }}
+            transition={{ duration: 0.15 }}
+            style={{
+              position: "absolute",
+              top: "calc(100% + 8px)",
+              left: 0,
+              right: 0,
+              zIndex: 100,
+              borderRadius: 14,
+              background: "rgba(18, 20, 32, 0.94)",
+              backdropFilter: "blur(20px) saturate(160%)",
+              WebkitBackdropFilter: "blur(20px) saturate(160%)",
+              border: "1px solid rgba(255, 255, 255, 0.14)",
+              boxShadow: "0 16px 40px rgba(0, 0, 0, 0.5)",
+              padding: 6,
+              maxHeight: 240,
+              overflowY: "auto",
+            }}
+          >
+            {boards.map((b) => {
+              const isSelected = b.id === selectedBoardId;
+              return (
+                <button
+                  key={b.id}
+                  type="button"
+                  onClick={() => {
+                    onSelectBoard(b.id);
+                    setIsOpen(false);
+                  }}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    width: "100%",
+                    padding: "8px 12px",
+                    borderRadius: 10,
+                    border: "none",
+                    background: isSelected ? "rgba(139, 111, 242, 0.22)" : "transparent",
+                    color: isSelected ? "#c084fc" : "#e2e8f0",
+                    fontSize: 13.5,
+                    fontWeight: isSelected ? 700 : 500,
+                    cursor: "pointer",
+                    textAlign: "left",
+                    transition: "all 0.12s ease",
+                    marginBottom: 2,
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isSelected) e.currentTarget.style.background = "rgba(255, 255, 255, 0.08)";
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isSelected) e.currentTarget.style.background = "transparent";
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, overflow: "hidden" }}>
+                    <span
+                      style={{
+                        width: 22,
+                        height: 22,
+                        borderRadius: 6,
+                        background: isSelected ? "#8b6ff2" : "rgba(255, 255, 255, 0.1)",
+                        color: "#ffffff",
+                        fontSize: 10,
+                        fontWeight: 800,
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        flexShrink: 0,
+                      }}
+                    >
+                      {b.name.slice(0, 2).toUpperCase()}
+                    </span>
+                    <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {b.name}
+                    </span>
+                  </div>
+                  {isSelected && (
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c084fc" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  )}
+                </button>
+              );
+            })}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
 
 function TeamPage() {
   const [query, setQuery] = useState("");
@@ -200,29 +377,12 @@ function TeamPage() {
             {/* Board Selector */}
             <div className="team-control-group">
               <span className="team-control-label">Board</span>
-              <div className="team-select-box">
-                <svg className="team-control-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="3" y="3" width="18" height="18" rx="2" />
-                  <path d="M9 3v18" />
-                  <path d="M14 9h7" />
-                  <path d="M14 15h7" />
-                </svg>
-                <select
-                  className="team-select-input"
-                  value={boardId}
-                  onChange={(e) => setBoardId(e.target.value)}
-                  disabled={boardsLoading || boards.length === 0}
-                >
-                  {boards.map((b) => (
-                    <option key={b.id} value={b.id}>
-                      {b.name}
-                    </option>
-                  ))}
-                </select>
-                <svg className="team-select-arrow" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="6 9 12 15 18 9" />
-                </svg>
-              </div>
+              <BoardSelectDropdown
+                boards={boards}
+                selectedBoardId={boardId}
+                onSelectBoard={setBoardId}
+                isLoading={boardsLoading}
+              />
             </div>
 
             {/* Member Search */}
