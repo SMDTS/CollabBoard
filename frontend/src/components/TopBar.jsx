@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
 import { useInvitations, useInvitationsActions } from "../context/InvitationsContext";
+import { useNotifications, useNotificationsActions } from "../context/NotificationsContext";
 import { useToast } from "../context/ToastContext";
 
 function initials(name) {
@@ -16,18 +17,35 @@ function formatDateTime(date) {
   return `${dateStr} · ${timeStr}`;
 }
 
+// "3m ago" / "2h ago" / "5d ago" — notifications are frequent enough that
+// a full date+time per item would be noisy; a relative age reads faster.
+function timeAgo(isoString) {
+  const seconds = Math.floor((Date.now() - new Date(isoString).getTime()) / 1000);
+  if (seconds < 60) return "just now";
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  return `${days}d ago`;
+}
+
 function TopBar({ onOpenSearch }) {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
   const { user, logout } = useAuth();
   const { invitations } = useInvitations();
   const { respond } = useInvitationsActions();
+  const { notifications, unreadCount } = useNotifications();
+  const { markRead, markAllRead } = useNotificationsActions();
   const showToast = useToast();
   const [now, setNow] = useState(new Date());
   const [menuOpen, setMenuOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [respondingId, setRespondingId] = useState(null);
   const isMac = typeof navigator !== "undefined" && /Mac/.test(navigator.platform);
+
+  const badgeCount = invitations.length + unreadCount;
 
   function handleLogout() {
     setMenuOpen(false);
@@ -48,6 +66,12 @@ function TopBar({ onOpenSearch }) {
     } finally {
       setRespondingId(null);
     }
+  }
+
+  function handleOpenNotification(notification) {
+    if (!notification.read) markRead(notification.id);
+    setNotifOpen(false);
+    navigate(notification.link);
   }
 
   useEffect(() => {
@@ -97,7 +121,7 @@ function TopBar({ onOpenSearch }) {
               <path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
               <path d="M13.73 21a2 2 0 01-3.46 0" />
             </svg>
-            {invitations.length > 0 && <span className="topbar__badge">{invitations.length}</span>}
+            {badgeCount > 0 && <span className="topbar__badge">{badgeCount}</span>}
           </button>
 
           {notifOpen && (
@@ -128,6 +152,33 @@ function TopBar({ onOpenSearch }) {
                       </button>
                     </div>
                   </div>
+                ))
+              )}
+
+              <div className="topbar__notif-title topbar__notif-title--row">
+                <span>Notifications</span>
+                {unreadCount > 0 && (
+                  <button className="topbar__notif-mark-all" onClick={markAllRead}>
+                    Mark all read
+                  </button>
+                )}
+              </div>
+              {notifications.length === 0 ? (
+                <div className="topbar__notif-empty">Nothing yet.</div>
+              ) : (
+                notifications.map((n) => (
+                  <button
+                    key={n.id}
+                    type="button"
+                    className={`topbar__notif-item topbar__notif-item--clickable ${n.read ? "" : "topbar__notif-item--unread"}`}
+                    onClick={() => handleOpenNotification(n)}
+                  >
+                    <div className="topbar__notif-text">
+                      {!n.read && <span className="topbar__notif-dot" aria-hidden="true" />}
+                      {n.message}
+                    </div>
+                    <span className="topbar__notif-time">{timeAgo(n.createdAt)}</span>
+                  </button>
                 ))
               )}
             </div>

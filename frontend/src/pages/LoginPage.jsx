@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Eye, EyeOff, Sparkles, Check } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
 import BG_SHAPE from "../assets/auth/bg-shape.png";
 import LOGO_ICON from "../assets/auth/logo-icon.png";
 import ILLUSTRATION from "../assets/auth/illustration.png";
@@ -41,11 +42,22 @@ function Field({ id, label, type = "text", value, onChange, adornment, autoCompl
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useAuth();
+  const showToast = useToast();
   const [showPw, setShowPw] = useState(false);
   const [form, setForm] = useState({ email: "", password: "" });
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (location.state?.justReset) {
+      showToast("Password updated — log in with your new password.", "success");
+      // Clear the state so a refresh doesn't re-show the toast.
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const update = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
 
@@ -118,7 +130,7 @@ export default function LoginPage() {
                 }
               />
 
-              <a href="#" className="ft-forgot">Forgot password?</a>
+              <Link to="/forgot-password" className="ft-forgot">Forgot password?</Link>
 
               {error && <p className="ft-error">{error}</p>}
 

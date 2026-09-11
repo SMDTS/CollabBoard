@@ -4,6 +4,8 @@ import * as boardRepository from "../repositories/boardRepository.js";
 import * as userRepository from "../repositories/userRepository.js";
 import * as activityService from "./activityService.js";
 import * as boardService from "./boardService.js";
+import { sendEmail } from "../utils/emailService.js";
+import * as notificationService from "./notificationService.js";
 import { NotFoundError, ForbiddenError } from "../utils/AppError.js";
 
 // Only fields a non-owner assignee is allowed to change when moving their
@@ -34,6 +36,8 @@ export async function getTaskById(id) {
 // Resolves an assigneeId into the {assigneeId, assignee} pair stored on
 // the task, after checking the chosen person actually has access to the
 // board (you can't assign a task to someone who isn't on the board).
+// Also returns the full user doc (assigneeUser) so callers can check
+// notification preferences without a second lookup.
 async function resolveAssignee(board, assigneeId) {
   const user = await userRepository.findById(assigneeId);
   if (!user) throw new NotFoundError("User");
@@ -44,7 +48,31 @@ async function resolveAssignee(board, assigneeId) {
     throw new ForbiddenError();
   }
 
-  return { assigneeId: user.id, assignee: user.name };
+  return { assigneeId: user.id, assignee: user.name, assigneeUser: user };
+}
+
+// Always creates the bell notification — the email preference only
+// controls whether an email *also* goes out, not whether the person
+// hears about it at all.
+async function notifyAssignment(user, task, boardName) {
+  if (!user) return;
+
+  await notificationService.notify({
+    recipientId: user.id,
+    type: "task_assigned",
+    message: `You've been assigned "${task.title}" on "${boardName}"`,
+    link: `/tasks/${task.id}`,
+  });
+
+  if (user.preferences?.notifyAssigned === false) return;
+  await sendEmail({
+    to: user.email,
+    subject: `You've been assigned: "${task.title}"`,
+    text:
+      `Hi ${user.name},\n\n` +
+      `You've been assigned a task on "${boardName}":\n\n"${task.title}"\n\n` +
+      `Open Flowty to see the details.`,
+  });
 }
 
 export async function createTask(data, actorId) {
@@ -58,7 +86,7 @@ export async function createTask(data, actorId) {
   // Only the board owner creates (and therefore assigns) tasks.
   boardService.assertOwner(board, actorId);
 
-  const { assigneeId, assignee } = await resolveAssignee(board, data.assigneeId);
+  const { assigneeId, assignee, assigneeUser } = await resolveAssignee(board, data.assigneeId);
 
   const task = await taskRepository.create({ ...data, assigneeId, assignee });
 
@@ -69,6 +97,8 @@ export async function createTask(data, actorId) {
     taskId: task.id,
     taskTitle: task.title,
   });
+
+  await notifyAssignment(assigneeUser, task, board.name);
 
   return task;
 }
@@ -98,13 +128,23 @@ export async function updateTask(id, patch, actorId) {
   }
 
   let resolvedPatch = patch;
+  let reassignedTo = null;
   if (patch.assigneeId) {
-    const { assigneeId, assignee } = await resolveAssignee(board, patch.assigneeId);
+    const { assigneeId, assignee, assigneeUser } = await resolveAssignee(board, patch.assigneeId);
     resolvedPatch = { ...patch, assigneeId, assignee };
+    // Only a genuine reassignment, not just the unchanged assigneeId that
+    // rides along on every full-doc PATCH from the offline-sync client.
+    if (String(assigneeId) !== String(before.assigneeId)) {
+      reassignedTo = assigneeUser;
+    }
   }
 
   const updated = await taskRepository.update(id, resolvedPatch);
   if (!updated) throw new NotFoundError("Task");
+
+  if (reassignedTo) {
+    await notifyAssignment(reassignedTo, updated, board.name);
+  }
 
   if (patch.columnId && String(patch.columnId) !== String(before.columnId)) {
     await activityService.logActivity({
