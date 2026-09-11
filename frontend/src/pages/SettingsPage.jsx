@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
 import { useTasks } from "../context/TasksContext";
@@ -10,7 +10,6 @@ import { useUsers } from "../context/UsersContext";
 import { updateMyPreferences, uploadAvatarFile, updateAvatarUrl } from "../api/users.js";
 import { AUTH_BG } from "../assets/cdn.js";
 import UserAvatar from "../components/UserAvatar.jsx";
-import ImageCropModal from "../components/ImageCropModal.jsx";
 
 const SHORTCUTS = [
   { keys: "B", action: "Toggle sidebar" },
@@ -32,8 +31,7 @@ function SettingsPage() {
 
   const [name, setName] = useState(user?.name || "");
   const [email, setEmail] = useState(user?.email || "");
-  const [selectedImageSrc, setSelectedImageSrc] = useState(null);
-  const [isCropModalOpen, setIsCropModalOpen] = useState(false);
+  const [avatarUrlInput, setAvatarUrlInput] = useState(user?.avatarUrl || "");
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [deleteStep, setDeleteStep] = useState(0);
 
@@ -44,37 +42,36 @@ function SettingsPage() {
   const [timezone, setTimezone] = useState("UTC");
   const [dateFormat, setDateFormat] = useState("MMM D");
 
-  function handleFileSelect(e) {
+  async function handleFileSelect(e) {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 10 * 1024 * 1024) {
-      showToast("Image size must be smaller than 10MB", "error");
+    if (file.size > 5 * 1024 * 1024) {
+      showToast("Image size must be smaller than 5MB", "error");
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      setSelectedImageSrc(reader.result);
-      setIsCropModalOpen(true);
-    };
-    reader.readAsDataURL(file);
-    e.target.value = "";
-  }
-
-  async function handleCropSave(croppedBlob) {
     setIsUploadingAvatar(true);
     try {
-      const croppedFile = new File([croppedBlob], "avatar.jpg", { type: "image/jpeg" });
-      const updatedUser = await uploadAvatarFile(croppedFile);
+      const updatedUser = await uploadAvatarFile(file);
       updateUser(updatedUser);
-      setIsCropModalOpen(false);
-      setSelectedImageSrc(null);
+      setAvatarUrlInput(updatedUser.avatarUrl || "");
       showToast("Profile picture updated", "success");
     } catch (err) {
-      showToast(err.message || "Failed to upload profile picture", "error");
+      showToast(err.message || "Failed to upload image", "error");
     } finally {
       setIsUploadingAvatar(false);
+    }
+  }
+
+  async function handleSaveAvatarUrl(e) {
+    e.preventDefault();
+    try {
+      const updatedUser = await updateAvatarUrl(avatarUrlInput.trim() || null);
+      updateUser(updatedUser);
+      showToast("Profile picture updated", "success");
+    } catch (err) {
+      showToast(err.message || "Failed to update profile picture URL", "error");
     }
   }
 
@@ -82,6 +79,7 @@ function SettingsPage() {
     try {
       const updatedUser = await updateAvatarUrl(null);
       updateUser(updatedUser);
+      setAvatarUrlInput("");
       showToast("Profile picture removed", "info");
     } catch {
       showToast("Failed to remove profile picture", "error");
@@ -252,31 +250,18 @@ function SettingsPage() {
                 </div>
 
                 <div className="settings-field">
-                  <label>Profile Picture</label>
-                  <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
-                    <label
-                      htmlFor="settings-avatar-file-input-btn"
-                      className="settings-btn settings-btn--ghost"
-                      style={{ display: "inline-flex", alignItems: "center", gap: 6, cursor: "pointer", margin: 0 }}
-                    >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-                        <circle cx="12" cy="13" r="4"/>
-                      </svg>
-                      Upload New Photo
-                    </label>
+                  <label htmlFor="settings-avatar-url">Profile Picture URL (Web Image)</label>
+                  <div style={{ display: "flex", gap: 8 }}>
                     <input
-                      id="settings-avatar-file-input-btn"
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileSelect}
-                      style={{ display: "none" }}
+                      id="settings-avatar-url"
+                      type="url"
+                      value={avatarUrlInput}
+                      onChange={(e) => setAvatarUrlInput(e.target.value)}
+                      placeholder="https://example.com/avatar.png"
                     />
-                    {user?.avatarUrl && (
-                      <button type="button" className="settings-btn settings-btn--danger" onClick={handleRemoveAvatar}>
-                        Remove Photo
-                      </button>
-                    )}
+                    <button type="button" className="settings-btn settings-btn--ghost" onClick={handleSaveAvatarUrl}>
+                      Apply
+                    </button>
                   </div>
                 </div>
 
@@ -284,6 +269,11 @@ function SettingsPage() {
                   <button type="submit" className="settings-btn settings-btn--primary">
                     Save Account
                   </button>
+                  {user?.avatarUrl && (
+                    <button type="button" className="settings-btn settings-btn--danger" onClick={handleRemoveAvatar}>
+                      Remove Picture
+                    </button>
+                  )}
                 </div>
               </form>
             </motion.section>
@@ -508,20 +498,6 @@ function SettingsPage() {
           </div>
         </div>
       </motion.div>
-
-      <AnimatePresence>
-        {isCropModalOpen && selectedImageSrc && (
-          <ImageCropModal
-            imageSrc={selectedImageSrc}
-            onClose={() => {
-              setIsCropModalOpen(false);
-              setSelectedImageSrc(null);
-            }}
-            onCrop={handleCropSave}
-            isUploading={isUploadingAvatar}
-          />
-        )}
-      </AnimatePresence>
     </motion.div>
   );
 }
