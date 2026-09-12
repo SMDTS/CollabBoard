@@ -6,12 +6,19 @@
 # here — backend/Dockerfile and the frontend build already read every env
 # var referenced below via backend/src/config.js and frontend/src/api/client.js.
 #
-# One thing you MUST do after the first deploy: if Render appends a
-# suffix to either service's name below (because "collabboard-api" or
-# "collabboard-client" was already taken by someone else — .onrender.com
-# names are global), update CLIENT_ORIGIN and VITE_API_URL to match the
-# real assigned URLs and redeploy both services. Check each service's
-# page in the Render Dashboard for its actual URL first.
+# Live at:
+#   https://collabboard-client-p85o.onrender.com  (collabboard-client)
+#   https://collabboard-api-cn2v.onrender.com      (collabboard-api)
+#
+# Both names below got a suffix appended by Render — "collabboard-api" and
+# "collabboard-client" were already taken by someone else (.onrender.com
+# names are global), so CLIENT_ORIGIN and VITE_API_URL are set to the real
+# assigned URLs above, not the plain names. If you fork this repo and
+# deploy your own copy, the same thing will likely happen to you with a
+# *different* random suffix — check each service's actual URL in the
+# Render Dashboard after the first deploy and update these two values
+# (then redeploy the client — VITE_API_URL is baked in at build time, so
+# just saving the env var isn't enough) to match.
 
 services:
   # ---- backend: Docker web service ----
@@ -28,7 +35,7 @@ services:
       # reads process.env.PORT (config.js), and the Dockerfile's own
       # HEALTHCHECK follows the same $PORT rather than a hardcoded value.
       - key: CLIENT_ORIGIN
-        value: https://collabboard-client.onrender.com
+        value: https://collabboard-client-p85o.onrender.com
       # Prompted for at Blueprint creation time in the Render Dashboard —
       # never committed here. Generate a long random string for JWT_SECRET;
       # get MONGODB_URI from your Atlas cluster's "Connect your application"
@@ -57,4 +64,4 @@ services:
       # deployments intentionally use different values for the same var;
       # see docs/DEPLOYMENT.md for why.
       - key: VITE_API_URL
-        value: https://collabboard-api.onrender.com
+        value: https://collabboard-api-cn2v.onrender.com

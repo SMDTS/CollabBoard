@@ -57,6 +57,14 @@ below, and it's a real credential, not something to commit anywhere.
 
 ## 3. After the first deploy — check the names matched
 
+**This happened on this exact deployment** — both names got a suffix:
+the frontend is live at `https://collabboard-client-p85o.onrender.com`,
+the backend at `https://collabboard-api-cn2v.onrender.com`. `render.yaml`
+already has these real URLs baked in, so a fresh deploy from this repo
+as-is won't hit the problem described below — this section is for
+understanding why, and for whenever you or someone else deploys their
+*own* copy under different (likely also-suffixed) names.
+
 `render.yaml` hardcodes each service's expected URL into the other's env
 vars (`CLIENT_ORIGIN` on the backend, `VITE_API_URL` on the frontend),
 because Render assigns URLs from the service `name:` fields
@@ -66,12 +74,24 @@ deterministically — `collabboard-api` → `collabboard-api.onrender.com` —
 
 Check both services' actual URLs on their pages in the Render Dashboard.
 If either got a suffix appended (e.g. `collabboard-api-a1b2.onrender.com`),
-update the *other* service's env var to match the real URL and manually
-redeploy that service (Render Dashboard → service → **Manual Deploy**).
-This is the single most likely thing to go wrong on a first deploy, and
-it fails loudly and obviously if missed — the frontend loads, but every
-API call and the socket connection fail with a CORS error visible in the
-browser console, not a silent bug.
+update the *other* service's env var to match the real URL. **The backend
+side (`CLIENT_ORIGIN`) takes effect on its own — Render redeploys
+automatically when you save an env var.** The frontend side
+(`VITE_API_URL`) does **not**: Vite bakes it into the built JavaScript at
+build time, not read at runtime, so saving the env var alone changes
+nothing until you also go to the client service → **Manual Deploy** →
+**Deploy latest commit** to force a real rebuild. Skipping that step is
+exactly what happened on this deployment's first attempt — the old bundle
+kept calling the old URL for one full deploy cycle before the rebuild was
+triggered.
+
+What it actually looks like when this is wrong, confirmed by seeing it
+happen: **not** a CORS error — a plain `404 Not Found` on every API call
+(login, register, everything), because the unsuffixed name the old bundle
+was still calling either doesn't exist or belongs to an unrelated Render
+service, so the request never reaches your backend at all. Open DevTools →
+Network during a login attempt and check which host the request is
+actually going to — that's the fastest way to catch this.
 
 ## Why this shape (two separate services, not the Docker Compose setup)
 
@@ -131,6 +151,6 @@ Don't just check that both services show "Live" in the dashboard — that
 only confirms the build succeeded, not that they can talk to each other.
 Do the same two-account, one-board, two-window check from
 `docs/SOCKET_EVENTS.md`'s testing section, against the real deployed
-`collabboard-client.onrender.com` URL. If presence and live task sync work
+`collabboard-client-p85o.onrender.com` URL. If presence and live task sync work
 there, CORS, the socket connection, and Atlas are all confirmed correctly
 wired — that one walkthrough exercises all three at once.
