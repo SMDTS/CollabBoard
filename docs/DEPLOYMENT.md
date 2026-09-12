@@ -116,6 +116,15 @@ in the Render Dashboard under the backend service's Environment tab if you
 want the forgot-password flow to send real emails instead of logging what
 would have been sent.
 
+Also optional, but worth knowing about — **avatar upload won't work
+without these**, and unlike `JWT_SECRET`/`MONGODB_URI` the app won't
+refuse to start or warn you; it just fails silently the first time
+someone tries to upload a photo:
+`CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`
+(see `backend/src/config/cloudinary.js` — a free Cloudinary account
+provides all three from its dashboard). Add them the same way, in the
+backend service's Environment tab.
+
 ## Verifying it actually worked
 
 Don't just check that both services show "Live" in the dashboard — that
