@@ -1,8 +1,30 @@
 import PouchDB from "pouchdb-browser";
 
 // One local database, persisted in IndexedDB by pouchdb-browser.
-// Every task is stored as a PouchDB doc with _id === task.id (as a string).
-export const tasksDB = new PouchDB("flowty-tasks");
+let db;
+try {
+  db = new PouchDB("flowty-tasks");
+} catch {
+  db = {
+    allDocs: async () => ({ rows: [] }),
+    bulkDocs: async () => [],
+    get: async () => {
+      const err = new Error("not_found");
+      err.status = 404;
+      throw err;
+    },
+    put: async () => {},
+    remove: async () => {},
+    changes: () => ({
+      on: function () {
+        return this;
+      },
+      cancel: () => {},
+    }),
+  };
+}
+
+export const tasksDB = db;
 
 // Sync bookkeeping lives on the doc itself, alongside the task fields.
 // - syncStatus: "synced" | "pending" | "conflict"

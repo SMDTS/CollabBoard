@@ -1,6 +1,4 @@
-import { apiFetch, getToken } from "./client.js";
-
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
+import { apiFetch, BASE_URL, getToken } from "./client.js";
 
 export function fetchUsers() {
   return apiFetch("/api/users");
