@@ -32,7 +32,11 @@ export function SocketProvider({ children }) {
     const token = getToken();
     if (!token) return undefined;
 
-    const socket = io(BASE_URL, { auth: { token } });
+    // BASE_URL === "" means "same origin" (see api/client.js and
+    // frontend/Dockerfile) — socket.io-client's way of expressing that is
+    // omitting the url argument entirely, not passing "", so this can't
+    // just be `io(BASE_URL, ...)`.
+    const socket = io(BASE_URL || undefined, { auth: { token } });
     socketRef.current = socket;
 
     function handleRemoteTask(payload, apply) {
