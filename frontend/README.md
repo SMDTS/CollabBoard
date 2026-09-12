@@ -69,6 +69,12 @@ npm run lint       # ESLint
 - **Offline-first task sync** — tasks live in a local PouchDB store first
   and sync to the server in the background, with conflict detection if
   the server version moved on since your last edit.
+- **Real-time task updates** — a Socket.IO connection pushes another
+  user's task create/move/delete straight into the same local PouchDB
+  store the offline sync uses, so it shows up immediately through the
+  same live-update path, not a separate one. A board's header shows an
+  "● N online" indicator for who else is currently on it. See
+  `../docs/SOCKET_EVENTS.md`.
 - **Collapsible sidebar**, with Settings pinned to the bottom.
 
 ## Project structure
@@ -87,6 +93,8 @@ src/
 │   ├── AuthContext.jsx          # Logged-in user + token, persisted to localStorage
 │   ├── TasksContext.jsx         # Live task state — add/move/update/delete via the offline-first sync layer
 │   ├── BoardsContext.jsx        # Live board state, scoped server-side to boards you own or belong to
+│   ├── SocketContext.jsx        # One Socket.IO connection; merges remote task events into PouchDB,
+│   │                            #   tracks per-board presence (usePresence(boardId))
 │   ├── InvitationsContext.jsx   # Polls pending invitations; powers the TopBar notification bell
 │   ├── UsersContext.jsx         # Read-only — the registered users list (used by Settings' export)
 │   └── ThemeContext.jsx, ToastContext.jsx
@@ -102,7 +110,9 @@ src/
 ├── pages/                           # One component per route (TeamPage is board-scoped, see below)
 ├── db/
 │   ├── pouchdb.js                    # Local task store + doc<->task shape conversion
-│   └── tasksSync.js                  # Push/pull sync loop, conflict handling
+│   └── tasksSync.js                  # Push/pull sync loop, conflict handling, and the
+│                                      #   applyRemoteTask/removeRemoteTask helpers SocketContext
+│                                      #   uses to merge a single incoming socket event
 ├── utils/
 │   ├── avatarColor.js                # One shared function — same person, same avatar color everywhere
 │   └── columns.js                    # Reads a board's columns consistently across pages
@@ -169,9 +179,11 @@ page container from scratch.
 
 ## Known limitations
 
-- **The notification bell polls, it doesn't push.** `InvitationsContext`
+- **The notification bell still polls, it doesn't push.** `InvitationsContext`
   re-fetches every 20 seconds — a new invite can take up to that long to
-  show up, there's no websocket layer yet.
+  show up. Task changes *are* real-time now (see Features above) — this
+  is a deliberate, named scope cut for this milestone, not an oversight;
+  see "Not implemented" in `../docs/SOCKET_EVENTS.md`.
 - **`src/assets/dashboard/dashboard-bg.jpg`** is no longer imported
   anywhere (an earlier Dashboard design used it); safe to delete.
 - **Due date/time is still a free-text field on the backend.** The
@@ -179,6 +191,10 @@ page container from scratch.
   stops older data (or a direct API call) from storing an arbitrary
   string — the stats aggregation's overdue calculation best-effort parses
   it and silently treats anything it can't parse as "no due date".
+- **Presence is best-effort, not authoritative.** The "● N online" count
+  comes from the server's in-memory socket rooms — a hard browser crash
+  (rather than a clean tab close) may leave a stale entry until Socket.IO's
+  own ping-timeout disconnect catches up, usually within a few seconds.
 
 ## Contributing notes
 
@@ -193,6 +209,12 @@ page container from scratch.
   back to `main.jsx`. `InvitationsProvider` is nested inside
   `BoardsProvider` specifically because accepting an invite needs to
   trigger `BoardsContext`'s `reload()`.
+- `SocketProvider` is mounted inside `BoardsProvider` for the same
+  reason — it needs the current board list to know which socket rooms to
+  join, and re-joins any newly-added board without waiting for a
+  reconnect. It does *not* need to be inside `TasksProvider`: it talks to
+  PouchDB directly through the same helpers the offline-sync loop uses,
+  not through `TasksContext`'s actions.
 - The Command Palette's open/closed state is controlled from `App.jsx`,
   not managed internally — this is what lets both the `Ctrl+K` shortcut
   and the TopBar's search button open the same instance.

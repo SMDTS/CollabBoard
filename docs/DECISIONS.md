@@ -72,13 +72,67 @@ for this.
 
 ## Notifications: polling, not push
 
-The invitation bell polls `GET /api/invitations` every 20 seconds instead
-of using Socket.io/SSE. A real-time push layer is still a listed
-milestone (see both READMEs' Status sections) — for now, polling is a
-small, dependency-free way to get "invites show up without a manual
-refresh" without pulling in a whole real-time layer for a single feature.
-Revisit this once activity feeds or task updates also need push, since
-at that point a shared websocket connection pays for itself.
+The invitation bell polls `GET /api/invitations` every 20 seconds rather
+than using Socket.io/SSE. This was written before the real-time milestone,
+reasoning that polling was a small, dependency-free way to get "invites
+show up without a manual refresh" without pulling in a whole real-time
+layer for a single feature — deferring push until something else also
+needed it, since at that point a shared websocket connection would pay
+for itself.
+
+That "something else" arrived with task sync (see below) — a Socket.IO
+connection now exists and is open for the whole session regardless. The
+bell still polls anyway: it was a deliberate scope cut for this
+milestone, not an oversight. Task events were the higher-value target
+against the rubric, and wiring `board:updated`/`member:joined` onto the
+same connection the task events already use is a small, well-scoped
+follow-up rather than a redesign — see "Not implemented" in
+`docs/SOCKET_EVENTS.md`.
+
+## Real-time task sync: Socket.IO, merged through PouchDB
+
+Needed a way for one user's task create/move/delete to show up live for
+everyone else looking at the same board, without duplicating the
+conflict/permission logic the REST API and offline-sync layer already
+enforce correctly.
+
+**Where the events come from.** Rather than moving task mutations onto
+socket messages, the REST controllers stay the single place a task is
+ever actually written — `taskController.js` emits `task:created` /
+`task:updated` / `task:deleted` to the task's board room right after each
+one succeeds (`req.app.get("io")`). This means every permission check,
+every optimistic-concurrency `version` check, and every activity-log entry
+still happens exactly once, in exactly one place; sockets only broadcast
+the result.
+
+**Why `actorId` instead of `socket.to()`'s auto-exclude.** The usual
+pattern for "don't echo an event back to whoever caused it" is
+`socket.to(room).emit(...)` from inside a socket handler, which
+automatically skips the sender's own socket. That doesn't apply here — the
+mutation arrives over a REST call (`fetch`), not a socket message, so
+there's no "sender socket" in scope at emit time. Every event instead
+carries `actorId`, and each client compares it against its own logged-in
+user id before applying the event, skipping its own actions. Same effect,
+just resolved client-side instead of server-side. See
+`docs/SOCKET_EVENTS.md` for the full event contract.
+
+**Why events merge into PouchDB instead of updating React state
+directly.** The frontend was already offline-first: `TasksContext` reads
+from a local PouchDB store, which has its own live `changes` feed, and its
+own rule for what's safe to overwrite (never a doc that's `pending` or
+`conflict` — those are only resolved through the existing sync/conflict
+flow). A remote task event follows that exact same rule
+(`applyRemoteTask`/`removeRemoteTask` in `frontend/src/db/tasksSync.js`)
+rather than writing a second, parallel notion of "current task state" into
+React state. `TasksContext` itself didn't need to change at all — it was
+already listening for exactly this kind of update.
+
+**Why presence and rooms are in-memory, not Redis.** The brief scopes this
+to one deployed instance; a `Map` of boardId → connected user ids inside
+the Node process is correct and simpler for that case. Documented as a
+known limitation (`docs/SOCKET_EVENTS.md`) rather than solved preemptively
+— the Socket.IO Redis adapter is a drop-in swap if/when a second instance
+is ever needed, not a rewrite.
 
 ## assigneeId vs. assignee
 
