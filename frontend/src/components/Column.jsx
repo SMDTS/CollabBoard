@@ -1,18 +1,33 @@
 // Column.jsx
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { useTasksActions } from "../context/TasksContext";
 
 const STATUS_THEME = {
-  "To Do": { accent: "var(--cb-violet)", tint: "var(--cb-todo-tint)" },
-  Doing: { accent: "var(--cb-sky)", tint: "var(--cb-doing-tint)" },
-  Done: { accent: "var(--cb-success)", tint: "var(--cb-done-tint)" },
+  "To Do": { accent: "#8b6ff2", tint: "rgba(139, 111, 242, 0.08)" },
+  Doing: { accent: "#38bdf8", tint: "rgba(56, 189, 248, 0.08)" },
+  Done: { accent: "#10b981", tint: "rgba(16, 185, 129, 0.08)" },
+};
+
+const COLUMN_VARIANTS = {
+  hidden: { opacity: 0, y: 18, scale: 0.97 },
+  show: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      duration: 0.3,
+      ease: [0.25, 0.1, 0.25, 1],
+      staggerChildren: 0.07,
+    },
+  },
 };
 
 function Column({ title, children, columnId, isOwner, onAddTask }) {
   const { moveTask } = useTasksActions();
   const [isDragOver, setIsDragOver] = useState(false);
 
-  const theme = STATUS_THEME[title] || { accent: "var(--cb-violet)", tint: "var(--cb-surface-sunken)" };
+  const theme = STATUS_THEME[title] || { accent: "#8b6ff2", tint: "rgba(255, 255, 255, 0.03)" };
   const isEmpty = children.length === 0;
 
   function handleDragOver(e) {
@@ -33,9 +48,9 @@ function Column({ title, children, columnId, isOwner, onAddTask }) {
   }
 
   return (
-    <div
+    <motion.div
+      variants={COLUMN_VARIANTS}
       className={`board-column ${isDragOver ? "board-column--drag-over" : ""}`}
-      style={{ background: theme.tint, borderColor: theme.accent }}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
@@ -45,7 +60,7 @@ function Column({ title, children, columnId, isOwner, onAddTask }) {
         <h2 className="board-column__title">{title}</h2>
         <span className="board-column__count">{children.length}</span>
       </div>
-      <div className="board-column__cards">
+      <motion.div className="board-column__cards">
         {isEmpty ? (
           <div className="board-column__empty">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
@@ -71,8 +86,8 @@ function Column({ title, children, columnId, isOwner, onAddTask }) {
             Add a card
           </button>
         )}
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
 

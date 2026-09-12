@@ -323,7 +323,7 @@
     .ft-hero {
       padding: 32px 28px 40px;
       min-height: 420px;
-      background: linear-gradient(160deg, #4a3fc2 0%, #6a5cf0 46%, #58b8ef 100%);
+      background: #8b6ff2;
     }
     .ft-hero-inner { max-width: 100%; }
     .ft-hero-copy { margin-top: 32px; }

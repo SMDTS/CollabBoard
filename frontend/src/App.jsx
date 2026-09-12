@@ -8,11 +8,11 @@ import { TaskConflictBanner } from "./components/TaskConflictBanner";
 import { useAuth } from "./context/AuthContext";
 import { TasksProvider } from "./context/TasksContext";
 import { BoardsProvider } from "./context/BoardsContext";
+import { SocketProvider } from "./context/SocketContext";
 import { UsersProvider } from "./context/UsersContext";
 import { InvitationsProvider } from "./context/InvitationsContext";
 import { NotificationsProvider } from "./context/NotificationsContext";
-import LoginPage from "./pages/LoginPage";
-import SignupPage from "./pages/SignupPage";
+import AuthPage from "./pages/AuthPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import BoardsListPage from "./pages/BoardsListPage";
@@ -29,6 +29,7 @@ const AUTH_ROUTES = ["/login", "/signup", "/forgot-password", "/reset-password"]
 function App() {
   const location = useLocation();
   const isAuthPage = AUTH_ROUTES.includes(location.pathname);
+  const isDashboard = location.pathname === "/dashboard";
   const { isAuthenticated, isLoading } = useAuth();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
@@ -36,8 +37,8 @@ function App() {
   if (isAuthPage) {
     return (
       <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/signup" element={<SignupPage />} />
+        <Route path="/login" element={<AuthPage />} />
+        <Route path="/signup" element={<AuthPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
       </Routes>
@@ -55,6 +56,7 @@ function App() {
 
   return (
     <BoardsProvider>
+      <SocketProvider>
       <InvitationsProvider>
       <NotificationsProvider>
       <TasksProvider>
@@ -63,7 +65,7 @@ function App() {
             <Sidebar />
             <div className="app__content">
               <TopBar onOpenSearch={() => setIsSearchOpen(true)} />
-              <div className="main">
+              <div className={`main ${isDashboard ? "main--dark" : ""}`}>
                 <Routes>
                   <Route path="/" element={<BoardsListPage />} />
                   <Route path="/boards/:boardId" element={<BoardPage />} />
@@ -83,6 +85,7 @@ function App() {
       </TasksProvider>
       </NotificationsProvider>
       </InvitationsProvider>
+      </SocketProvider>
     </BoardsProvider>
   );
 }

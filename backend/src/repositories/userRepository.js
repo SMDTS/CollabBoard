@@ -68,3 +68,7 @@ export function updatePreferences(userId, patch) {
   }
   return User.findByIdAndUpdate(userId, { $set: set }, { new: true });
 }
+
+export function updateAvatar(userId, avatarUrl) {
+  return User.findByIdAndUpdate(userId, { avatarUrl }, { new: true });
+}

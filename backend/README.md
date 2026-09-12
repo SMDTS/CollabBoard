@@ -57,7 +57,8 @@ user to exist first (it falls back to the earliest-registered user if
 
 Full request/response contract, including every error case, is in
 `../docs/API_CONTRACT.md`. A ready-to-import Postman collection is in
-`../Postman/`.
+`../Postman/`. For the real-time layer (not REST — see below), the event
+contract is in `../docs/SOCKET_EVENTS.md`.
 
 | Resource | Base path | Auth required |
 |---|---|:---:|
@@ -99,6 +100,9 @@ src/
   middleware/     authenticate (JWT verification), validate (zod), error
                   handling, request logging/id.
   schemas/        zod schemas describing valid request shapes per resource.
+  sockets/        Socket.IO setup — handshake auth, board rooms, presence.
+                  Doesn't know about tasks; controllers emit into it via
+                  req.app.get("io"). See ../docs/SOCKET_EVENTS.md.
   scripts/        seedBoards.js — one-off scripts, not part of the running app.
   utils/          AppError and its subclasses (NotFoundError, ForbiddenError,
                   ConflictError, UnauthorizedError, ValidationError),
@@ -111,7 +115,15 @@ src/
 listening. That means:
 - Tests can import `app` directly with no port needed
 - Multiple test files can run in parallel with zero port collisions
-- `server.js` is the only file that ever calls `app.listen()`
+- `server.js` is the only file that ever calls `httpServer.listen()`
+
+`server.js` wraps `app` in a plain `http.createServer(app)` rather than
+calling `app.listen()` directly, specifically so Socket.IO can attach to
+that same HTTP server (`attachSockets(httpServer, config)`) instead of
+needing a second port. Tests never touch `server.js` at all — they import
+`app.js` directly, so `req.app.get("io")` is `undefined` in every test and
+the socket-emit calls in the controllers just no-op (`io?.to(...)`)
+rather than throwing.
 
 ## Notable design decisions
 
@@ -148,6 +160,17 @@ listening. That means:
   is what powers the Team page's "search someone to invite" box. With no
   `q`, it falls back to the original "list everyone" behavior other pages
   still use.
+- **Task mutations stay REST; Socket.IO only broadcasts the result.**
+  `task:created`/`task:updated`/`task:deleted` are emitted from
+  `taskController.js` right after the corresponding service call succeeds
+  — every permission check and the `version` optimistic-concurrency check
+  still happen exactly once, in the normal request path. A socket
+  connection never writes anything by itself. See
+  `../docs/SOCKET_EVENTS.md`.
+- **Joining a board's socket room re-checks membership.** `board:join`
+  looks the board up and checks owner-or-member before letting the socket
+  into that room — same rule `GET /api/boards/:id` enforces, checked
+  again here since a socket connection outlives any single request.
 
 ## Known gaps
 
@@ -155,7 +178,14 @@ listening. That means:
   optional `?boardId=` filter, but doesn't check the requester actually
   belongs to that board before returning its activity — worth tightening
   alongside the rest of the permission model above.
-- **No automated tests yet.**
+- **`member:joined` / `board:updated` aren't wired up as socket events
+  yet.** Inviting/removing a member or editing a board still needs a
+  manual refresh to see from another session — the notification bell
+  still polls every 20s. Task events were the higher-value target for
+  this milestone; see "Not implemented" in `../docs/SOCKET_EVENTS.md`.
+- **Presence and socket rooms are in-memory on one process.** Correct for
+  a single deployed instance (per the brief); would need the Socket.IO
+  Redis adapter before running more than one backend instance.
 
 ## Status
 
@@ -173,6 +203,13 @@ listening. That means:
       members/invitations, tasks (owner + assignee permission cases),
       users (including `?q=` search), and activity — 54 requests across
       8 folders, including failure cases (400/401/403/404/409) for each
-- [ ] Automated tests + CI
-- [ ] Real-time sync (Socket.io) — notifications currently poll
-- [ ] Docker, deployment
+- [x] Automated tests + CI (Jest/Supertest, run via GitHub Actions on
+      every push/PR)
+- [x] Real-time sync (Socket.IO): board-scoped rooms, JWT-authenticated
+      handshake, task create/update/delete broadcast, presence — see
+      `../docs/SOCKET_EVENTS.md`. `member:joined`/`board:updated` not
+      yet wired (see Known gaps); notifications still poll.
+- [x] Docker: `backend/Dockerfile` (single-stage `node:22-alpine`,
+      production deps only, non-root, `/api/health` healthcheck) — see
+      the root README's "Running with Docker".
+- [ ] Deployment (public URL)

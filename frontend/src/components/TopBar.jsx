@@ -1,4 +1,3 @@
-// TopBar.jsx
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
@@ -6,10 +5,8 @@ import { useAuth } from "../context/AuthContext";
 import { useInvitations, useInvitationsActions } from "../context/InvitationsContext";
 import { useNotifications, useNotificationsActions } from "../context/NotificationsContext";
 import { useToast } from "../context/ToastContext";
-
-function initials(name) {
-  return (name || "?").slice(0, 2).toUpperCase();
-}
+import { AUTH_BG } from "../assets/cdn.js";
+import UserAvatar from "./UserAvatar.jsx";
 
 function formatDateTime(date) {
   const dateStr = date.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
@@ -17,8 +14,6 @@ function formatDateTime(date) {
   return `${dateStr} · ${timeStr}`;
 }
 
-// "3m ago" / "2h ago" / "5d ago" — notifications are frequent enough that
-// a full date+time per item would be noisy; a relative age reads faster.
 function timeAgo(isoString) {
   const seconds = Math.floor((Date.now() - new Date(isoString).getTime()) / 1000);
   if (seconds < 60) return "just now";
@@ -80,7 +75,11 @@ function TopBar({ onOpenSearch }) {
   }, []);
 
   return (
-    <div className="topbar">
+    <div className="topbar topbar--mirror">
+      <div className="topbar__bg" aria-hidden="true">
+        <div className="topbar__bg-img" style={{ backgroundImage: `url(${AUTH_BG})` }} />
+        <div className="topbar__bg-overlay" />
+      </div>
       <div className="topbar__datetime">{formatDateTime(now)}</div>
 
       <button className="topbar__search" onClick={onOpenSearch}>
@@ -186,8 +185,8 @@ function TopBar({ onOpenSearch }) {
         </div>
 
         <div className="topbar__profile">
-          <button className="topbar__avatar" onClick={() => setMenuOpen((prev) => !prev)} aria-label="Profile menu">
-            {initials(user?.name)}
+          <button className="topbar__avatar" onClick={() => setMenuOpen((prev) => !prev)} aria-label="Profile menu" style={{ padding: 0, overflow: "hidden", borderRadius: "50%", background: "none", border: "none" }}>
+            <UserAvatar user={user} size={32} />
           </button>
 
           {menuOpen && (

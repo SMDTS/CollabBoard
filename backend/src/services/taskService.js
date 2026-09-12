@@ -179,4 +179,9 @@ export async function deleteTask(id, actorId) {
     taskId: task.id,
     taskTitle: task.title,
   });
+
+  // The row is gone by the time we'd otherwise need this for the socket
+  // event, so hand back the bit of the pre-deletion doc the controller
+  // needs to tell the right board room what happened.
+  return { id: task.id, boardId: task.boardId };
 }
