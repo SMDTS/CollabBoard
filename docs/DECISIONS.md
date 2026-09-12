@@ -134,6 +134,24 @@ known limitation (`docs/SOCKET_EVENTS.md`) rather than solved preemptively
 — the Socket.IO Redis adapter is a drop-in swap if/when a second instance
 is ever needed, not a rewrite.
 
+## Deployment: Render (two services) + Atlas, not the Compose shape
+
+`docker-compose.yml` serves the frontend through nginx, same-origin,
+proxying to the backend over Docker's internal network — that only works
+because Compose puts both containers on one network where they can reach
+each other by service name. Two independent Render services don't share
+that, so the deployed shape is different on purpose: the frontend as a
+Render static site (CDN-served, not a container), talking to the
+backend's public URL directly, cross-origin, with CORS and Socket.IO's
+`cors.origin` scoped to that exact frontend URL.
+
+This needed zero source changes. `client.js`'s `BASE_URL` and
+`SocketContext.jsx`'s socket connection already worked this exact way in
+local dev — `localhost:5173` talking to `localhost:4000` is already
+cross-origin — the deployed config just points the same mechanism at real
+URLs instead of localhost ones. See `docs/DEPLOYMENT.md` for the full
+setup and the env-var wiring between the two services.
+
 ## assigneeId vs. assignee
 
 Tasks store both an `assigneeId` (a real `User` ref) and an `assignee`

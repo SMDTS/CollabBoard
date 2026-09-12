@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
 import * as authApi from "../api/auth.js";
 import { getToken, setToken, getLastActivity, updateLastActivity } from "../api/client.js";
+import { clearLocalDb } from "../db/tasksSync.js";
 
 const AuthContext = createContext(null);
 
@@ -14,6 +15,7 @@ export function AuthProvider({ children }) {
   const logout = useCallback(() => {
     setToken(null);
     setUser(null);
+    clearLocalDb().catch(console.error);
   }, []);
 
   // Restore session on app start

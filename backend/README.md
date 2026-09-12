@@ -209,4 +209,7 @@ rather than throwing.
       handshake, task create/update/delete broadcast, presence — see
       `../docs/SOCKET_EVENTS.md`. `member:joined`/`board:updated` not
       yet wired (see Known gaps); notifications still poll.
-- [ ] Docker, deployment
+- [x] Docker: `backend/Dockerfile` (single-stage `node:22-alpine`,
+      production deps only, non-root, `/api/health` healthcheck) — see
+      the root README's "Running with Docker".
+- [ ] Deployment (public URL)

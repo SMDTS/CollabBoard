@@ -114,3 +114,32 @@ correct recovery path the app already had for coming back online.
   Node process's memory. Fine for a single instance (per the brief); would
   need the Socket.IO Redis adapter before running more than one backend
   instance behind a load balancer.
+
+## Testing status
+
+- [x] `backend/tests/sockets.test.js` — an automated integration test, not
+      just a manual check. Unlike the other test files, it can't use
+      supertest's app-wrapping trick (there's no HTTP upgrade to hook
+      into without a real listening server), so it spins up an actual
+      `http.createServer` with Socket.IO attached — the same setup
+      `server.js` uses — on an ephemeral port, and connects to it with
+      real `socket.io-client` sockets. Covers:
+  - handshake auth: connecting with no token / an invalid token is
+    rejected (`NO_TOKEN` / `BAD_TOKEN`), a valid token is accepted
+  - `board:join` succeeds for a board's owner/members and is silently
+    ignored for anyone else, confirmed by asserting `board:joined`
+    does **not** arrive within a timeout
+  - `task:created` / `task:updated` / `task:deleted` are broadcast to
+    everyone in the board's room, each carrying the correct `actorId`,
+    after the real REST call succeeds — and are confirmed **not** to
+    reach a socket that never joined that board's room
+  - `presence:update` reflects a board's room membership correctly as
+    sockets join, a second one joins, and one disconnects
+- [x] Manual two-browser walkthrough — two accounts, one board, confirmed
+      the presence indicator, a live card move between windows, the
+      `101 Switching Protocols` WebSocket upgrade in DevTools, and
+      reconnection after a dropped connection. Run against the Docker
+      Compose setup specifically (`localhost:8080`, through nginx's
+      `/socket.io/` proxy), not just the local dev servers — so this
+      also confirms the proxy config above actually works, not just the
+      socket code in isolation.

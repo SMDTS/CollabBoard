@@ -1,0 +1,63 @@
+# docker-compose.yml
+#
+# `docker compose up --build` from a clean clone should be enough to get
+# a working app at http://localhost:8080 — no local Node/Mongo install
+# needed. Set JWT_SECRET in a .env file next to this one (copy
+# .env.example) for anything beyond a quick local run; the fallback below
+# exists so the stack still starts without one.
+
+services:
+  mongo:
+    image: mongo:7
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  server:
+    build: ./backend
+    environment:
+      PORT: 4000
+      # The browser only ever talks to the client container (localhost:8080);
+      # requests to the API and the socket server are both proxied through
+      # nginx from there (see frontend/nginx.conf), so this mainly matters
+      # for anyone hitting :4000 directly (Postman, curl, the health check).
+      CLIENT_ORIGIN: http://localhost:8080
+      JWT_SECRET: ${JWT_SECRET:-dev-secret-change-me-in-a-real-deployment}
+      MONGODB_URI: ${MONGODB_URI:-mongodb://mongo:27017/flowty}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      EMAIL_FROM: ${EMAIL_FROM:-Flowty <no-reply@flowty.dev>}
+    ports:
+      - "4000:4000"
+    depends_on:
+      mongo:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--spider", "http://127.0.0.1:4000/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  client:
+    build:
+      context: ./frontend
+      args:
+        # "" = same-origin relative /api and /socket.io requests, which is
+        # what nginx.conf's proxy rules expect. Only override this at build
+        # time if the API is genuinely served from a different origin than
+        # this container.
+        VITE_API_URL: ""
+    ports:
+      - "8080:80"
+    depends_on:
+      server:
+        condition: service_healthy
+
+volumes:
+  mongo-data:

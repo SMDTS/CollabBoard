@@ -1,0 +1,60 @@
+# render.yaml — Render Blueprint
+#
+# https://render.com/docs/blueprint-spec
+#
+# Two services, both free tier, no code changes needed to deploy from
+# here — backend/Dockerfile and the frontend build already read every env
+# var referenced below via backend/src/config.js and frontend/src/api/client.js.
+#
+# One thing you MUST do after the first deploy: if Render appends a
+# suffix to either service's name below (because "collabboard-api" or
+# "collabboard-client" was already taken by someone else — .onrender.com
+# names are global), update CLIENT_ORIGIN and VITE_API_URL to match the
+# real assigned URLs and redeploy both services. Check each service's
+# page in the Render Dashboard for its actual URL first.
+
+services:
+  # ---- backend: Docker web service ----
+  - type: web
+    name: collabboard-api
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    healthCheckPath: /api/health
+    envVars:
+      # Render sets PORT itself (defaults to 10000) and injects it into the
+      # container automatically — do NOT set PORT here. The backend already
+      # reads process.env.PORT (config.js), and the Dockerfile's own
+      # HEALTHCHECK follows the same $PORT rather than a hardcoded value.
+      - key: CLIENT_ORIGIN
+        value: https://collabboard-client.onrender.com
+      # Prompted for at Blueprint creation time in the Render Dashboard —
+      # never committed here. Generate a long random string for JWT_SECRET;
+      # get MONGODB_URI from your Atlas cluster's "Connect your application"
+      # dialog (see docs/DEPLOYMENT.md).
+      - key: JWT_SECRET
+        sync: false
+      - key: MONGODB_URI
+        sync: false
+
+  # ---- frontend: static site ----
+  - type: web
+    runtime: static
+    name: collabboard-client
+    buildCommand: cd frontend && npm ci && npm run build
+    staticPublishPath: frontend/dist
+    routes:
+      # SPA fallback — without this, a hard refresh on e.g. /boards/abc123
+      # 404s instead of letting React Router handle it client-side.
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      # Baked into the JS bundle at build time (Vite), not read at runtime —
+      # this is why it's a real URL here, unlike the "" used for the
+      # same-origin Docker Compose setup in docker-compose.yml. The two
+      # deployments intentionally use different values for the same var;
+      # see docs/DEPLOYMENT.md for why.
+      - key: VITE_API_URL
+        value: https://collabboard-api.onrender.com

@@ -106,11 +106,17 @@ export default function ForgotPasswordPage() {
                       autoComplete="email"
                     />
 
-                    {error && <p className="as-error">{error}</p>}
+                    {error && <motion.p initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} className="as-error">{error}</motion.p>}
 
-                    <button type="submit" className="as-cta" disabled={submitted}>
+                    <motion.button
+                      whileHover={{ scale: 1.015 }}
+                      whileTap={{ scale: 0.985 }}
+                      type="submit"
+                      className="as-cta"
+                      disabled={submitted}
+                    >
                       {submitted ? "Sending…" : "Send reset link"}
-                    </button>
+                    </motion.button>
                   </form>
 
                   <p className="as-switch">

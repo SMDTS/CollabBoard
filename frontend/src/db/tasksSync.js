@@ -168,3 +168,15 @@ export function startSyncLoop({ onConflicts, intervalMs = 30000 } = {}) {
     clearInterval(interval);
   };
 }
+
+export async function clearLocalDb() {
+  try {
+    const { rows } = await tasksDB.allDocs({ include_docs: true });
+    const deleteOps = rows.map((r) => ({ _id: r.id, _rev: r.doc._rev, _deleted: true }));
+    if (deleteOps.length > 0) {
+      await tasksDB.bulkDocs(deleteOps);
+    }
+  } catch (err) {
+    console.error("Failed to clear local db on logout:", err);
+  }
+}
