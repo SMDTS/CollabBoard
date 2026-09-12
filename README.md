@@ -113,10 +113,11 @@ stop working in a container without erroring anywhere obvious.
 
 ### Option C — the real deployed version
 
-Render (backend as a Docker web service, frontend as a static site) +
-MongoDB Atlas, both free tier. Full setup walkthrough (Atlas cluster,
-Render Blueprint, env vars): `docs/DEPLOYMENT.md`. Actual config:
-`render.yaml` at the repo root.
+**Live at https://collabboard-client-p85o.onrender.com** (API:
+`https://collabboard-api-cn2v.onrender.com`). Render (backend as a Docker
+web service, frontend as a static site) + MongoDB Atlas, both free tier.
+Full setup walkthrough: `docs/DEPLOYMENT.md`. Actual config: `render.yaml`
+at the repo root.
 
 ## Core concepts
 
@@ -203,9 +204,9 @@ a real Socket.IO server rather than mocking it — see `docs/SOCKET_EVENTS.md`'s
       API + nginx-served client) from a clean clone — confirmed working,
       including real-time through the container setup specifically (not
       just standalone). See "Getting started" above.
-- [ ] Deployment (public URL) — config is written and ready
-      (`render.yaml`, `docs/DEPLOYMENT.md`); going live is the one
-      remaining step.
+- [x] Deployment: live at https://collabboard-client-p85o.onrender.com
+      (Render + MongoDB Atlas, both free tier) — `render.yaml` +
+      `docs/DEPLOYMENT.md`.
 
 ## Docs index
 
