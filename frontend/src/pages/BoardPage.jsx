@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useBoards } from "../context/BoardsContext";
 import { useTasks } from "../context/TasksContext";
 import { useAuth } from "../context/AuthContext";
+import { usePresence } from "../context/SocketContext";
 import { getColumns } from "../utils/columns";
 import Board from "../components/Board";
 import TaskDetailPanel from "../components/TaskDetailPanel";
@@ -35,6 +36,7 @@ function BoardPage() {
   const [members, setMembers] = useState([]);
 
   const isOwner = !!board && board.ownerId === user?.id;
+  const onlineUserIds = usePresence(boardId);
 
   useEffect(() => {
     if (!board) return;
@@ -149,6 +151,33 @@ function BoardPage() {
               return <UserAvatar key={name} user={member} name={name} size={28} className="bp2-header__person" title={name} />;
             })}
           </div>
+
+          {onlineUserIds.length > 0 && (
+            <div
+              className="bp2-header__online"
+              title={`Online now: ${onlineUserIds.length}`}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                fontSize: 12,
+                color: "#8de08d",
+                flex: "0 0 auto",
+              }}
+            >
+              <span
+                aria-hidden="true"
+                style={{
+                  width: 7,
+                  height: 7,
+                  borderRadius: "50%",
+                  background: "#4ade80",
+                  boxShadow: "0 0 0 2px rgba(74, 222, 128, 0.25)",
+                }}
+              />
+              {onlineUserIds.length} online
+            </div>
+          )}
 
           <div className="bp2-header__progress">
             <div className="bp2-header__progress-track">

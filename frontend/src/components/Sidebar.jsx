@@ -3,7 +3,7 @@ import { NavLink } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { LayoutGrid, Gauge, CheckSquare, Users, Settings, ChevronLeft } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
-import { LOGO_ICON } from "../assets/cdn.js";
+import { LOGO_ICON, AUTH_BG } from "../assets/cdn.js";
 import UserAvatar from "./UserAvatar.jsx";
 
 const NAV_ITEMS = [
@@ -71,6 +71,8 @@ function Sidebar() {
         setHoveredTooltip(null);
       }}
     >
+      <div className="sidebar__bg" style={{ backgroundImage: `url(${AUTH_BG})` }} aria-hidden="true" />
+      <div className="sidebar__bg-overlay" aria-hidden="true" />
       <div className="sidebar__top">
         <div className="sidebar__brand">
           <motion.img

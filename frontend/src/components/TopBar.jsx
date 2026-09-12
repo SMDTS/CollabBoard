@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import { useInvitations, useInvitationsActions } from "../context/InvitationsContext";
 import { useNotifications, useNotificationsActions } from "../context/NotificationsContext";
 import { useToast } from "../context/ToastContext";
+import { AUTH_BG } from "../assets/cdn.js";
 import UserAvatar from "./UserAvatar.jsx";
 
 function formatDateTime(date) {
@@ -75,6 +76,10 @@ function TopBar({ onOpenSearch }) {
 
   return (
     <div className="topbar topbar--mirror">
+      <div className="topbar__bg" aria-hidden="true">
+        <div className="topbar__bg-img" style={{ backgroundImage: `url(${AUTH_BG})` }} />
+        <div className="topbar__bg-overlay" />
+      </div>
       <div className="topbar__datetime">{formatDateTime(now)}</div>
 
       <button className="topbar__search" onClick={onOpenSearch}>

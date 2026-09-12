@@ -43,6 +43,44 @@ export async function pullRemoteTasks() {
   if (writes.length) await tasksDB.bulkDocs(writes);
 }
 
+// --- applying a single remote change (from a socket event) -----------------
+//
+// Same rule pullRemoteTasks uses for a whole batch, just for one doc: never
+// stomp on local work that's still pending or sitting in conflict. This is
+// what lets a task:updated event and the offline-sync loop share one path
+// into PouchDB instead of the socket layer needing its own merge logic.
+export async function applyRemoteTask(task) {
+  const id = String(task.id);
+  let existing = null;
+  try {
+    existing = await tasksDB.get(id);
+  } catch {
+    // doesn't exist locally yet — fine, this is effectively a create
+  }
+
+  if (existing && (existing.syncStatus === "pending" || existing.syncStatus === "conflict")) {
+    return; // local work in flight — let the next push/pull reconcile it
+  }
+
+  await tasksDB.put(toDoc(task, existing ? { _rev: existing._rev } : {}));
+}
+
+export async function removeRemoteTask(taskId) {
+  const id = String(taskId);
+  let existing;
+  try {
+    existing = await tasksDB.get(id);
+  } catch {
+    return; // already gone locally
+  }
+
+  if (existing.syncStatus === "pending" || existing.syncStatus === "conflict") {
+    return; // don't delete out from under local work in flight
+  }
+
+  await tasksDB.remove(existing);
+}
+
 // --- pushing local writes out to the API ------------------------------------
 
 // Returns { conflicts: [{ taskId, localTask, serverTask }] } for anything

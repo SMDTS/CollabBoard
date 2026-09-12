@@ -8,6 +8,7 @@ import { TaskConflictBanner } from "./components/TaskConflictBanner";
 import { useAuth } from "./context/AuthContext";
 import { TasksProvider } from "./context/TasksContext";
 import { BoardsProvider } from "./context/BoardsContext";
+import { SocketProvider } from "./context/SocketContext";
 import { UsersProvider } from "./context/UsersContext";
 import { InvitationsProvider } from "./context/InvitationsContext";
 import { NotificationsProvider } from "./context/NotificationsContext";
@@ -55,6 +56,7 @@ function App() {
 
   return (
     <BoardsProvider>
+      <SocketProvider>
       <InvitationsProvider>
       <NotificationsProvider>
       <TasksProvider>
@@ -83,6 +85,7 @@ function App() {
       </TasksProvider>
       </NotificationsProvider>
       </InvitationsProvider>
+      </SocketProvider>
     </BoardsProvider>
   );
 }
