@@ -135,7 +135,6 @@ correct recovery path the app already had for coming back online.
     reach a socket that never joined that board's room
   - `presence:update` reflects a board's room membership correctly as
     sockets join, a second one joins, and one disconnects
-<<<<<<< HEAD
 - [x] Manual two-browser walkthrough — two accounts, one board, confirmed
       the presence indicator, a live card move between windows, the
       `101 Switching Protocols` WebSocket upgrade in DevTools, and
@@ -144,10 +143,3 @@ correct recovery path the app already had for coming back online.
       `/socket.io/` proxy), not just the local dev servers — so this
       also confirms the proxy config above actually works, not just the
       socket code in isolation.
-=======
-- [ ] No manual two-browser-tab walkthrough recorded yet — worth doing
-      once before the demo regardless of the automated coverage above,
-      since it's the only thing that actually exercises the real UI
-      (PouchDB merge, the "● N online" indicator, drag-and-drop) rather
-      than the raw socket protocol.
->>>>>>> ce85d609a1efc3cdbcf6c9444614d40c0cd1fd84

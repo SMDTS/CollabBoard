@@ -16,29 +16,13 @@ RUN npm ci --omit=dev
 COPY src ./src
 
 ENV NODE_ENV=production
-<<<<<<< HEAD
-# Documentation only — Docker doesn't enforce this, and platforms like
-# Render ignore it entirely (they inject their own PORT and expect the
-# app to bind to that instead, which it does — see config.js). This value
-# matches docker-compose.yml's local PORT for that context specifically.
-=======
->>>>>>> ce85d609a1efc3cdbcf6c9444614d40c0cd1fd84
 EXPOSE 4000
 
 # node:22-alpine already ships a non-root "node" user — no need to create one.
 USER node
 
-<<<<<<< HEAD
-# Shell form (not exec-array form) so $PORT actually gets expanded here —
-# the app binds to whatever process.env.PORT is at runtime (Render sets
-# this to 10000 itself; docker-compose sets it to 4000 explicitly; falls
-# back to 4000 to match config.js's own default if neither set it).
-HEALTHCHECK --interval=10s --timeout=5s --start-period=10s --retries=5 \
-  CMD wget --quiet --spider http://127.0.0.1:${PORT:-4000}/api/health || exit 1
-=======
 # Alpine has no curl by default; wget (busybox) is already there.
 HEALTHCHECK --interval=10s --timeout=5s --start-period=10s --retries=5 \
   CMD wget --quiet --spider http://127.0.0.1:4000/api/health || exit 1
->>>>>>> ce85d609a1efc3cdbcf6c9444614d40c0cd1fd84
 
 CMD ["node", "src/server.js"]
