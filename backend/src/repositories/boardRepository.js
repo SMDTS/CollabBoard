@@ -15,6 +15,11 @@ export async function findById(id) {
   }
 }
 
+export async function findByIds(ids) {
+  if (!Array.isArray(ids) || ids.length === 0) return [];
+  return Board.find({ _id: { $in: ids } });
+}
+
 export async function create({ name, description, ownerId }) {
   return Board.create({ name, description, owner: ownerId, members: [] });
 }

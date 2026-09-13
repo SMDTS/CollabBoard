@@ -147,13 +147,22 @@ export async function updateTask(id, patch, actorId) {
   }
 
   if (patch.columnId && String(patch.columnId) !== String(before.columnId)) {
+    const fromCol = board.columns?.find(
+      (c) => (c._id?.toString?.() ?? c.id) === String(before.columnId)
+    );
+    const toCol = board.columns?.find(
+      (c) => (c._id?.toString?.() ?? c.id) === String(patch.columnId)
+    );
     await activityService.logActivity({
       action: "moved",
       actorId,
       boardId: updated.boardId,
       taskId: updated.id,
       taskTitle: updated.title,
-      details: { from: before.columnId, to: patch.columnId },
+      details: {
+        from: fromCol?.title ?? before.columnId,
+        to: toCol?.title ?? patch.columnId,
+      },
     });
   }
 
