@@ -104,6 +104,21 @@ function StatIcon({ name }) {
   );
 }
 
+function formatActivityMessage(message, boards) {
+  if (!message) return "";
+  return message.replace(/\b([0-9a-fA-F]{24})\b/g, (hex) => {
+    if (Array.isArray(boards)) {
+      for (const b of boards) {
+        if (Array.isArray(b.columns)) {
+          const found = b.columns.find((c) => (c.id || c._id?.toString?.()) === hex);
+          if (found) return found.title;
+        }
+      }
+    }
+    return "Doing";
+  });
+}
+
 function DashboardPage() {
   const { boards } = useBoards();
   const tasks = useTasks();
@@ -284,7 +299,7 @@ function DashboardPage() {
                     <motion.li key={item.id} className="dashv2-activity__item" variants={LIST_ITEM_VARIANTS}>
                       <span className="dashv2-activity__dot" />
                       <div className="dashv2-activity__content">
-                        <p className="dashv2-activity__msg">{item.message}</p>
+                        <p className="dashv2-activity__msg">{formatActivityMessage(item.message, boards)}</p>
                       </div>
                     </motion.li>
                   ))}

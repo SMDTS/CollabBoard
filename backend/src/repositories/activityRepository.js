@@ -21,5 +21,6 @@ export async function findRecent({ boardId, limit = 20 } = {}) {
   return Activity.find(query)
     .sort({ createdAt: -1 })
     .limit(limit)
-    .populate("actor", "name email");
+    .populate("actor", "name email")
+    .populate("board", "name columns");
 }

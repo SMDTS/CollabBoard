@@ -143,10 +143,8 @@ describe("Activity feed", () => {
 
     const moved = res.body.find((a) => a.action === "moved");
     expect(moved).toBeDefined();
-    // The feed item only exposes `message` (not the raw `details` object),
-    // and the message embeds the destination *column id*, not a friendly
-    // column name — see activityService.toFeedItem/notifyBoardMembers.
-    expect(moved.message).toBe(`${user.name} moved "Ship the release" to ${doing}`);
+    // The feed item exposes `message` with the friendly column title ("Doing").
+    expect(moved.message).toBe(`${user.name} moved "Ship the release" to Doing`);
   });
 
   it("logs a 'deleted' activity entry that keeps the task's title after the task is gone", async () => {

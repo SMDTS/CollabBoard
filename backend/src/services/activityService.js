@@ -5,30 +5,52 @@ import * as userRepository from "../repositories/userRepository.js";
 import { sendEmail } from "../utils/emailService.js";
 import * as notificationService from "./notificationService.js";
 
+function resolveColumnName(board, colValue) {
+  if (!colValue) return "Doing";
+  const colStr = String(colValue);
+  if (board && Array.isArray(board.columns)) {
+    const found = board.columns.find(
+      (c) =>
+        (c._id?.toString?.() ?? c.id ?? "").toString() === colStr ||
+        (c.id ?? "").toString() === colStr ||
+        c.title === colValue
+    );
+    if (found) return found.title;
+  }
+  if (/^[0-9a-fA-F]{24}$/.test(colStr)) {
+    return "Doing";
+  }
+  return colValue;
+}
+
 // Turns a stored activity doc into the sentence the Dashboard shows
 // (e.g. "Sarah moved 'Build TaskCard component' to Doing"). Kept in the
 // service layer, not the model, so the controller/frontend never needs
 // to know the shape of `details` for each action type.
-function toFeedItem(activity) {
+function toFeedItem(activity, boardDoc) {
   const actorName = activity.actor?.name ?? "Someone";
   const title = activity.taskTitle;
+  const board = boardDoc || activity.board;
 
   let message;
   if (activity.action === "created") {
     message = `${actorName} created "${title}"`;
   } else if (activity.action === "moved") {
-    message = `${actorName} moved "${title}" to ${activity.details?.to ?? "a new column"}`;
+    const colTitle = resolveColumnName(board, activity.details?.to);
+    message = `${actorName} moved "${title}" to ${colTitle}`;
   } else if (activity.action === "deleted") {
     message = `${actorName} deleted "${title}"`;
   } else {
     message = `${actorName} updated "${title}"`;
   }
 
+  const boardId = board?._id ? board._id.toString() : (board?.id ?? board ?? activity.board);
+
   return {
     id: activity.id,
     action: activity.action,
     message,
-    board: activity.board,
+    board: boardId,
     task: activity.task,
     actor: activity.actor ? { id: activity.actor.id, name: activity.actor.name } : null,
     createdAt: activity.createdAt,
@@ -37,7 +59,28 @@ function toFeedItem(activity) {
 
 export async function getRecentActivity({ boardId, limit } = {}) {
   const activities = await activityRepository.findRecent({ boardId, limit });
-  return activities.map(toFeedItem);
+
+  const unpopulatedBoardIds = [
+    ...new Set(
+      activities
+        .filter((a) => a.board && typeof a.board !== "object")
+        .map((a) => String(a.board))
+    ),
+  ];
+
+  let boardMap = new Map();
+  if (unpopulatedBoardIds.length > 0) {
+    const fetchedBoards = await boardRepository.findByIds(unpopulatedBoardIds);
+    boardMap = new Map(fetchedBoards.map((b) => [b.id, b]));
+  }
+
+  return activities.map((activity) => {
+    const boardDoc =
+      typeof activity.board === "object" && activity.board
+        ? activity.board
+        : boardMap.get(String(activity.board));
+    return toFeedItem(activity, boardDoc);
+  });
 }
 
 // Called from taskService (create/update/delete) — this is the "also
@@ -82,7 +125,10 @@ async function notifyBoardMembers({ action, actorId, boardId, taskId, taskTitle,
 
   let message;
   if (action === "created") message = `${actorName} created "${taskTitle}"`;
-  else if (action === "moved") message = `${actorName} moved "${taskTitle}" to ${details?.to ?? "a new column"}`;
+  else if (action === "moved") {
+    const colTitle = resolveColumnName(board, details?.to);
+    message = `${actorName} moved "${taskTitle}" to ${colTitle}`;
+  }
   else if (action === "deleted") message = `${actorName} deleted "${taskTitle}"`;
   else message = `${actorName} updated "${taskTitle}"`;
 

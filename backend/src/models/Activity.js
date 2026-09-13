@@ -15,12 +15,8 @@ const activitySchema = new Schema(
     // proper ref and can be populated for a display name.
     actor: { type: Schema.Types.ObjectId, ref: "User", required: true },
 
-    // Which board it happened on. NOTE: Board is real Mongo now, but
-    // Task (and therefore data.boardId coming from taskService) is still
-    // the in-memory numeric-id version as of this milestone — so this is
-    // Mixed rather than a strict ObjectId ref until Member 3's Task
-    // migration lands. Same reasoning for `task` below.
-    board: { type: Schema.Types.Mixed, required: true },
+    // Which board it happened on.
+    board: { type: Schema.Types.ObjectId, ref: "Board", required: true },
     task: { type: Schema.Types.Mixed, required: false },
 
     // Denormalized snapshot of the task's title at the time of the event.
